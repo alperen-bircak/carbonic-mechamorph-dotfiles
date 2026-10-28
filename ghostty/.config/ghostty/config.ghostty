@@ -1,0 +1,4 @@
+# ghostty config; see `ghostty +show-config --default --docs` for all options
+
+# Ayu dark from the v9.1.0 palette (themes/ayu-v9); built-in "Ayu" is the older one
+theme = ayu-v9

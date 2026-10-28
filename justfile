@@ -1,5 +1,5 @@
 # Stow packages that get symlinked into ~
-packages := "sway bash bin"
+packages := "sway bash bin ghostty"
 
 # List recipes
 default:
