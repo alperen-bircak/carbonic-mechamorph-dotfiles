@@ -1,0 +1,4 @@
+#!/bin/bash
+# cl: run claude, but use ~/claude-home instead of $HOME when launched from home
+[ "$PWD" = "$HOME" ] && cd ~/claude-home
+exec claude "$@"

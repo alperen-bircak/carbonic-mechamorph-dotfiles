@@ -1,0 +1,3 @@
+#!/bin/bash
+# clp: shorthand for claude -p; all arguments are joined into one prompt, so no quotes needed
+exec claude -p "$*"

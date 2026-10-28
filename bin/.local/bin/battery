@@ -1,0 +1,57 @@
+#!/bin/bash
+# Pretty battery overview from /sys/class/power_supply
+bat=/sys/class/power_supply/BAT0
+read_val() { cat "$bat/$1" 2>/dev/null || echo 0; }
+
+pct=$(read_val capacity)
+status=$(read_val status)
+now=$(read_val charge_now)
+full=$(read_val charge_full)
+design=$(read_val charge_full_design)
+current=$(read_val current_now)
+voltage=$(read_val voltage_now)
+start=$(read_val charge_control_start_threshold)
+stop=$(read_val charge_control_end_threshold)
+mode=$(grep -o '\[[^]]*\]' "$bat/charge_types" 2>/dev/null | tr -d '[]')
+
+bold=$'\e[1m' dim=$'\e[2m' reset=$'\e[0m'
+if   (( pct <= 15 )); then color=$'\e[31m'
+elif (( pct <= 40 )); then color=$'\e[33m'
+else                       color=$'\e[32m'
+fi
+
+case $status in
+    Charging)       icon="⚡" ;;
+    Discharging)    icon="🔋" ;;
+    Full)           icon="✔" ;;
+    *)              icon="🔌" ;;
+esac
+
+# 30-cell bar
+width=30
+filled=$(( pct * width / 100 ))
+bar="${color}$(printf '█%.0s' $(seq 1 $filled))${dim}$(printf '░%.0s' $(seq 1 $(( width - filled ))))${reset}"
+
+watts=$(awk -v c="$current" -v v="$voltage" 'BEGIN { printf "%.1f", c * v / 1e12 }')
+health=$(awk -v f="$full" -v d="$design" 'BEGIN { if (d > 0) printf "%.0f", f * 100 / d }')
+
+hours_to_hm() { awk -v h="$1" 'BEGIN { m = int(h * 60 + 0.5); printf "%dh %02dm", m / 60, m % 60 }'; }
+if (( current > 0 )); then
+    case $status in
+        Discharging) eta="$(hours_to_hm "$(awk -v n="$now" -v c="$current" 'BEGIN { print n / c }')") left" ;;
+        Charging)    eta="$(hours_to_hm "$(awk -v n="$now" -v f="$full" -v c="$current" 'BEGIN { print (f - n) / c }')") to full" ;;
+    esac
+fi
+
+echo
+printf '  %s %s%s%%%s  %s\n' "$icon" "$bold$color" "$pct" "$reset" "$bar"
+printf '  %s%s%s\n\n' "$bold" "$status${eta:+ · $eta}" "$reset"
+printf '  %-10s %s W\n' "Power" "$watts"
+printf '  %-10s %s%% %s(%s / %s mAh design)%s\n' "Health" "$health" "$dim" "$(( full / 1000 ))" "$(( design / 1000 ))" "$reset"
+if [[ $mode == Custom ]]; then
+    printf '  %-10s %s %s(charges between %s%% and %s%%)%s\n' "Mode" "$mode" "$dim" "$start" "$stop" "$reset"
+else
+    printf '  %-10s %s\n' "Mode" "$mode"
+fi
+printf '  %-10s %s\n' "Model" "$(read_val manufacturer) $(read_val model_name)"
+echo

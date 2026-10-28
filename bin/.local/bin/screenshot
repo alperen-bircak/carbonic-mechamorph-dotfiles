@@ -1,0 +1,12 @@
+#!/bin/sh
+# Usage: screenshot [area]  -- saves to ~/Pictures/Screenshots and copies to clipboard
+dir="$HOME/Pictures/Screenshots"
+mkdir -p "$dir"
+file="$dir/$(date +%Y-%m-%d_%H-%M-%S).png"
+
+if [ "$1" = area ]; then
+    geom=$(slurp) || exit 0   # Escape cancels the selection
+    grim -g "$geom" "$file"
+else
+    grim "$file"
+fi && wl-copy --type image/png < "$file"

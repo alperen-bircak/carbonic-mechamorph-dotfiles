@@ -1,0 +1,10 @@
+#!/bin/sh
+# Pick an entry from clipboard history with fzf and copy it back to the clipboard
+# Usage: clip          pick and copy
+#        clip delete   pick and remove an entry from history
+#        clip wipe     clear the whole history
+case "$1" in
+    delete) cliphist list | fzf --no-sort --prompt='delete> ' | cliphist delete ;;
+    wipe)   cliphist wipe && echo "Clipboard history cleared" ;;
+    *)      cliphist list | fzf --no-sort --prompt='clip> ' | cliphist decode | wl-copy ;;
+esac
