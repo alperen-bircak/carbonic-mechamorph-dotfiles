@@ -1,0 +1,10 @@
+# Merged with wiremix's defaults (opened from waybar with ephemeral-tui).
+# Esc quits like the other TUIs; it still closes the help screen (?) first.
+# Dropdowns close with Enter or a click instead.
+
+# Start on the Output Devices tab
+tab = "output"
+
+keybindings = [
+  { key = "Esc", action = "Exit" },
+]

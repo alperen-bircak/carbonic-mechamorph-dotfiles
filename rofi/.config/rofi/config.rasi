@@ -1,0 +1,21 @@
+// rofi config; see `rofi -dump-config` for all options
+
+configuration {
+    // App icons: Adwaita for generic ones, apps' own icons come from hicolor
+    show-icons: true;
+    icon-theme: "Adwaita";
+
+    // Prompt text for each mode
+    display-drun: "Apps";
+    display-run: "Run";
+    display-window: "Windows";
+
+    // For apps that need a terminal (Terminal=true in their .desktop file)
+    terminal: "kitty";
+
+    // Open an entry with a single click, not a double-click
+    me-select-entry: "";
+    me-accept-entry: "MousePrimary";
+}
+
+@theme "ayu"

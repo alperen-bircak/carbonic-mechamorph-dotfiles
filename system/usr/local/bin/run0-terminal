@@ -1,0 +1,16 @@
+#!/bin/sh
+# Print an ID for the terminal that process $1 runs in, used by the run0 polkit
+# rule and run0k: the tty and session of its nearest ancestor that has a
+# terminal (so a new terminal reusing the same pts gets a different ID).
+# Prints nothing if no ancestor has one.
+pid=$1
+while [ "$pid" -gt 1 ] 2>/dev/null; do
+    stat=$(cat "/proc/$pid/stat" 2>/dev/null) || exit 0
+    # Fields after the process name: state ppid pgrp session tty_nr
+    set -- ${stat##*) }
+    if [ "$5" != 0 ]; then
+        echo "$5-$4"
+        exit 0
+    fi
+    pid=$2
+done

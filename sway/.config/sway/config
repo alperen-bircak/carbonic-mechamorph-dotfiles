@@ -14,14 +14,16 @@ set $down j
 set $up k
 set $right l
 # Your preferred terminal emulator
-set $term foot
+set $term kitty
 # Your preferred application launcher
-set $menu wmenu-run
+set $menu rofi -show drun
 
 ### Output configuration
 #
 # Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
 output * bg /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
+# Laptop panel is 3200x1800; 2x felt too zoomed in, 1.8 gives a 1777x1000 workspace
+output eDP-1 scale 1.8
 #
 # Example configuration:
 #
@@ -36,24 +38,41 @@ gaps inner 6
 # No title bars, just a thin border that shows which window is focused
 default_border pixel 2
 default_floating_border pixel 2
+# Jump to a window that asks for focus instead of only marking its workspace
+# urgent. Only works when the app passes an activation token (kitty does for
+# links); use Mod+u for apps that don't.
+focus_on_window_activation focus
+
+### Window rules
+#
+# Float Thunar's rename dialogs (single and bulk) instead of tiling them
+for_window [app_id="thunar" title="^Rename "] floating enable
+# Float the TUIs that waybar's modules open with ephemeral-tui (app_id tui.NAME)
+for_window [app_id="^tui\."] floating enable
+# Float Blueman in the middle of the screen (opened from waybar's bluetooth with blueman-toggle)
+for_window [app_id="blueman-manager"] floating enable, resize set 800 500, move position center
 
 ### Idle configuration
 #
 # Lock after 5 minutes idle, turn displays off after 10, lock before suspend.
 exec swayidle -w \
-         timeout 300 'swaylock -f -c 000000' \
+         timeout 300 'gtklock -d' \
          timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
-         before-sleep 'swaylock -f -c 000000'
+         before-sleep 'gtklock -d'
 
 ### Autostart
 #
 # Notifications and the polkit password prompt for GUI apps
 exec mako
+# On-screen display for the volume and brightness keys (swayosd-client below)
+exec swayosd-server
 exec /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 # Automount USB drives (with a notification)
 exec udiskie
 # Record clipboard history (browse it with `clip` in a terminal)
 exec wl-paste --watch cliphist store
+# Close the waybar TUIs (ephemeral-tui) when you click another window
+exec ~/.local/bin/tui-autoclose
 
 ### Input configuration
 #
@@ -79,12 +98,16 @@ exec wl-paste --watch cliphist store
 #
     # Start a terminal
     bindsym $mod+Return exec $term
+    # ...in the focused terminal's directory
+    bindsym $mod+Shift+Return exec ~/.local/bin/term-here
 
     # Kill focused window
     bindsym $mod+Shift+q kill
 
     # Start your launcher
     bindsym $mod+d exec $menu
+    # Tap Mod on its own for the Super Menu (tap again to close it)
+    bindsym --release Super_L exec ~/.local/bin/super-menu
 
     # Drag floating windows by holding down $mod and left mouse button.
     # Resize them with right mouse button + $mod.
@@ -111,6 +134,8 @@ exec wl-paste --watch cliphist store
     bindsym $mod+Down focus down
     bindsym $mod+Up focus up
     bindsym $mod+Right focus right
+    # Jump to the window that most recently asked for attention (e.g. Firefox after clicking a link)
+    bindsym $mod+u [urgent=latest] focus
 
     # Move the focused window with the same, but add Shift
     bindsym $mod+Shift+$left move left
@@ -136,6 +161,9 @@ exec wl-paste --watch cliphist store
     bindsym $mod+8 workspace number 8
     bindsym $mod+9 workspace number 9
     bindsym $mod+0 workspace number 10
+    # Cycle through workspaces
+    bindsym $mod+Tab workspace next
+    bindsym $mod+Shift+Tab workspace prev
     # Move focused container to workspace
     bindsym $mod+Shift+1 move container to workspace number 1
     bindsym $mod+Shift+2 move container to workspace number 2
@@ -157,6 +185,8 @@ exec wl-paste --watch cliphist store
     # respectively.
     bindsym $mod+b splith
     bindsym $mod+v splitv
+    # Undo a split while the window is still the only one in it
+    bindsym $mod+c exec ~/.local/bin/unsplit
 
     # Switch the current container between different layout styles
     bindsym $mod+s layout stacking
@@ -171,6 +201,9 @@ exec wl-paste --watch cliphist store
 
     # Swap focus between the tiling area and the floating area
     bindsym $mod+space focus mode_toggle
+
+    # Switch keyboard layout between Turkish and US
+    bindsym Ctrl+space input type:keyboard xkb_switch_layout next
 
     # Move focus to the parent container
     bindsym $mod+a focus parent
@@ -213,22 +246,22 @@ bindsym $mod+r mode "resize"
 #
 # Utilities:
 #
-    # Special keys to adjust volume via PulseAudio
-    bindsym --locked XF86AudioMute exec pactl set-sink-mute \@DEFAULT_SINK@ toggle
-    bindsym --locked XF86AudioLowerVolume exec pactl set-sink-volume \@DEFAULT_SINK@ -5%
-    bindsym --locked XF86AudioRaiseVolume exec pactl set-sink-volume \@DEFAULT_SINK@ +5%
-    bindsym --locked XF86AudioMicMute exec pactl set-source-mute \@DEFAULT_SOURCE@ toggle
+    # Special keys to adjust volume, with an on-screen display (swayosd)
+    bindsym --locked XF86AudioMute exec swayosd-client --output-volume mute-toggle
+    bindsym --locked XF86AudioLowerVolume exec swayosd-client --output-volume -5
+    bindsym --locked XF86AudioRaiseVolume exec swayosd-client --output-volume +5
+    bindsym --locked XF86AudioMicMute exec swayosd-client --input-volume mute-toggle
 
-    # Special keys to control media via playerctl
-    bindsym --locked XF86AudioPlay exec playerctl play-pause
-    bindsym --locked XF86AudioPause exec playerctl play-pause
-    bindsym --locked XF86AudioPrev exec playerctl previous
-    bindsym --locked XF86AudioNext exec playerctl next
-    bindsym --locked XF86AudioStop exec playerctl stop
+    # Special keys to control media, with an on-screen display of the track (swayosd)
+    bindsym --locked XF86AudioPlay exec swayosd-client --playerctl play-pause
+    bindsym --locked XF86AudioPause exec swayosd-client --playerctl play-pause
+    bindsym --locked XF86AudioPrev exec swayosd-client --playerctl prev
+    bindsym --locked XF86AudioNext exec swayosd-client --playerctl next
+    bindsym --locked XF86AudioStop exec swayosd-client --playerctl stop
 
-    # Special keys to adjust brightness via brightnessctl
-    bindsym --locked XF86MonBrightnessDown exec brightnessctl set 5%-
-    bindsym --locked XF86MonBrightnessUp exec brightnessctl set 5%+
+    # Special keys to adjust brightness, with an on-screen display (swayosd)
+    bindsym --locked XF86MonBrightnessDown exec swayosd-client --brightness -5
+    bindsym --locked XF86MonBrightnessUp exec swayosd-client --brightness +5
 
     # Screenshots: saved to ~/Pictures/Screenshots and copied to the clipboard
     bindsym Print exec ~/.local/bin/screenshot
@@ -239,25 +272,23 @@ bindsym $mod+r mode "resize"
 #
 # Read `man 5 sway-bar` for more information about this section.
 bar {
-    position top
-
-    # When the status_command prints a new line to stdout, swaybar updates.
-    # The default just shows the current date and time.
-    status_command while date +'%Y-%m-%d %X'; do sleep 1; done
-
-    colors {
-        statusline #ffffff
-        background #323232
-        inactive_workspace #32323200 #32323200 #5c5c5c
-    }
+    # Waybar draws the bar; its config is in ~/.config/waybar
+    swaybar_command waybar
 }
 
 include /etc/sway/config.d/*
 
 input type:keyboard {
-    xkb_layout tr
+    xkb_layout tr,us
 }
 
 input type:touchpad {
     natural_scroll enabled
+    # Two-finger press = right click, three = middle (default needs the bottom-right corner)
+    click_method clickfinger
+    # Tap to click; two-finger tap = right click, three = middle
+    tap enabled
+    tap_button_map lrm
+    # Tap, then touch again and move to drag
+    drag enabled
 }

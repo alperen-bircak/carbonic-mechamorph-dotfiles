@@ -1,0 +1,8 @@
+#!/bin/sh
+# Usage: unsplit  -- undo the last Mod+b / Mod+v on the focused window
+swaymsg -q 'split none' 2>/dev/null && exit 0
+
+# Splitting a lone window doesn't wrap it in a container (i3 behaviour), it
+# only flips the workspace's direction, so put that back to side by side.
+lone=$(swaymsg -t get_tree | jq '[.. | objects | select(.type == "workspace" and ([.. | objects | .focused?] | any))][0].nodes | length == 1 and .[0].focused')
+[ "$lone" = true ] && swaymsg -q 'splith'

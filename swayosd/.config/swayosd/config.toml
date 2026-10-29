@@ -1,0 +1,14 @@
+[server]
+# How far down the screen the OSD sits (0.5 is the centre)
+top_margin = 0.85
+
+# Don't let the volume keys go past 100% (swayosd's default is 150)
+max_volume = 100
+
+# The brightness keys stop here, so the screen can't go black (brightness-tui stops at 1%)
+min_brightness = 5
+
+show_percentage = true
+
+# Milliseconds the OSD stays up after the last key press
+duration = 1000

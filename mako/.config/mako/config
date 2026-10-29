@@ -1,0 +1,2 @@
+# Dismiss notifications after 5s (mako default is never)
+default-timeout=5000

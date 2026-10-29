@@ -1,0 +1,61 @@
+#!/bin/sh
+# Usage: super-menu
+# Super Menu: a short rofi menu of favourite apps, opened by tapping Mod (Super) in sway.
+# Running it again while rofi is open closes rofi instead, so a second tap closes the menu.
+# Apps are desktop ids (files in /usr/share/applications without .desktop), in menu order.
+# The last entry, Settings, opens a second menu with the TUIs that waybar's modules open
+# (same ephemeral-tui commands as the waybar clicks), plus a few one-shot commands.
+apps="thunar firefox kitty"
+
+# Settings submenu: "Name|icon|command", in menu order
+bin=$HOME/.local/bin
+settings="Bluetooth|bluetooth-active-symbolic|$bin/ephemeral-tui bluetui
+Sound|audio-volume-high-symbolic|$bin/ephemeral-tui wiremix
+Wi-Fi|network-wireless-symbolic|$bin/ephemeral-tui wlctl
+Brightness & night light|display-brightness-symbolic|$bin/ephemeral-tui -s 72x7 brightness $bin/brightness-tui
+Keyboard layout|input-keyboard-symbolic|$bin/ephemeral-tui -s 60x7 keyboard $bin/keyboard-tui
+Battery|battery-symbolic|$bin/ephemeral-tui battop
+Disks|drive-harddisk-symbolic|$bin/ephemeral-tui -s 72x14 disks $bin/disks-tui
+Unlock password|changes-allow-symbolic|$bin/unlock-password"
+
+pkill -x rofi && exit
+
+# One "Name\0icon\x1fIcon" line per app, the format rofi uses for icons in dmenu mode
+list() {
+    for id in $apps; do
+        f=/usr/share/applications/$id.desktop
+        name=$(grep -m1 '^Name=' "$f" | cut -d= -f2-)
+        icon=$(grep -m1 '^Icon=' "$f" | cut -d= -f2-)
+        printf '%s\0icon\037%s\n' "$name" "$icon"
+    done
+    printf 'Settings\0icon\037preferences-system-symbolic\n'
+}
+
+# A centred bold title (rofi's message bar) instead of the search bar, then the list
+# (pick with arrows or j/k + Enter or l, or a click; h or Escape closes). The title uses the
+# theme's font, the system one.
+# Prints the index of the picked line.
+theme='
+mainbox { children: [ message, listview ]; }
+message { background-color: transparent; padding: 6px 0 10px 0; }
+textbox { horizontal-align: 0.5; text-color: @accent; }'
+menu() {
+    rofi -dmenu -i -no-custom -format i -show-icons -markup -mesg "<b>$1</b>" -theme-str "$theme" \
+        -kb-row-down 'Down,Control+n,j' -kb-row-up 'Up,Control+p,k' \
+        -kb-accept-entry 'Control+j,Control+m,Return,KP_Enter,l' \
+        -kb-cancel 'Escape,Control+g,Control+bracketleft,h'
+}
+
+i=$(list | menu 'Super Menu') || exit
+set -- $apps
+if [ "$i" -lt $# ]; then
+    shift "$i"
+    exec gtk-launch "$1"
+fi
+
+i=$(printf '%s\n' "$settings" | while IFS='|' read -r name icon _; do
+    printf '%s\0icon\037%s\n' "$name" "$icon"
+done | menu 'Settings') || exit
+cmd=$(printf '%s\n' "$settings" | sed -n "$((i + 1))p" | cut -d'|' -f3)
+# word splitting on purpose: "ephemeral-tui -s 72x7 brightness /path/to/brightness-tui" is five words
+exec $cmd

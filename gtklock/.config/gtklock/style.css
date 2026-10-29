@@ -1,0 +1,28 @@
+/* Dark rounded panel over the wallpaper, holding the clock and password box */
+#window-box {
+    background-color: rgba(0, 0, 0, 0.55);
+    border-radius: 16px;
+    padding: 32px 48px;
+}
+
+#clock-label {
+    font-size: 64px;
+    font-weight: bold;
+    color: white;
+}
+
+#date-label {
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 16px;
+}
+
+#input-field {
+    min-width: 280px;
+    padding: 8px 12px;
+    border-radius: 8px;
+}
+
+#error-label {
+    color: #ff6b6b;
+}

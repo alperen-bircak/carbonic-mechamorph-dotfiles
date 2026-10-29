@@ -1,0 +1,48 @@
+#!/bin/sh
+# run0 that keeps you authenticated, like sudo: after a successful call, run0
+# needs no password in this terminal for 15 minutes, and each call restarts that
+# (see system/etc/polkit-1/rules.d/49-run0-grace.rules)
+# When the terminal isn't unlocked, the password is asked in rofi, showing the
+# command and what ran it, and checked by sudo, which unlocks the terminal; this
+# replaces polkit-gnome's popup. Escape cancels without a failed try counting.
+# Usage: run0k <command> [args...]
+id=$(/usr/local/bin/run0-terminal $$)
+[ -n "$id" ] || exec run0 "$@"
+
+unlocked() {
+    [ -n "$(find "/run/run0-grace/$id" -maxdepth 0 -mmin -15 2>/dev/null)" ]
+}
+
+# Without a graphical session (no rofi), fall back to run0's own prompt
+if ! unlocked && { [ -n "$WAYLAND_DISPLAY" ] || [ -n "$DISPLAY" ]; }; then
+    # What ran us: the nearest parent that isn't a shell (claude, kitty, ...)
+    pid=$PPID
+    while caller=$(ps -o comm= -p "$pid") &&
+        case $caller in sh|bash|dash|zsh|fish) true ;; *) false ;; esac; do
+        pid=$(ps -o ppid= -p "$pid" | tr -d ' ')
+    done
+    # The command on one line, at most 300 characters, escaped for Pango markup
+    cmd=$(printf '%s' "$*" | tr '\n' ' ' | awk '{ print substr($0, 1, 300) }' |
+        sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g')
+    mesg="<b>Run as root</b>
+<tt>$cmd</tt>
+<small>asked by ${caller:-unknown}</small>"
+    error=
+    theme='
+mainbox { children: [ message, inputbar ]; }
+entry { placeholder: "Password"; }'
+    while :; do
+        pw=$(rofi -dmenu -password -p '' -markup -mesg "$mesg$error" -theme-str "$theme" \
+            </dev/null) || exit 1
+        # sudo -k always checks the password, -S reads it from the pipe
+        printf '%s\n' "$pw" |
+            sudo -S -k -p '' sh -c 'mkdir -p /run/run0-grace && touch "/run/run0-grace/$1"' \
+                run0k "$id" 2>/dev/null && break
+        error="
+<span color='#f07178'>Wrong password (3 wrong in a row locks it for 10 minutes)</span>"
+    done
+    unset pw
+fi
+
+exec run0 sh -c 'mkdir -p /run/run0-grace && touch "/run/run0-grace/$1" && shift && exec "$@"' \
+    run0k "$id" "$@"

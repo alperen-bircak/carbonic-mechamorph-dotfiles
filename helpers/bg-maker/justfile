@@ -1,0 +1,38 @@
+# Hex Background Maker. Node comes from nvm (see .nvmrc); falls back to the
+# system node if nvm isn't installed.
+
+set shell := ["bash", "-c"]
+
+node := 'if [ -s "${NVM_DIR:-$HOME/.nvm}/nvm.sh" ]; then source "${NVM_DIR:-$HOME/.nvm}/nvm.sh" && nvm use --silent >/dev/null; fi;'
+
+# List recipes
+default:
+    @just --list
+
+# Install dependencies
+install:
+    {{node}} npm install
+
+# Start the dev server and open it in the browser
+dev: _deps
+    {{node}} npx vite --open
+
+# Build a static copy into dist/
+build: _deps
+    {{node}} npm run build
+
+# Build, then serve dist/ and open it (the fast way to just use the app)
+app: build
+    {{node}} npx vite preview --open
+
+# Type-check without building
+check: _deps
+    {{node}} npm run typecheck
+
+# Remove build output and dependencies
+clean:
+    rm -rf dist node_modules
+
+# Install dependencies on first run
+_deps:
+    @[ -d node_modules ] || just install

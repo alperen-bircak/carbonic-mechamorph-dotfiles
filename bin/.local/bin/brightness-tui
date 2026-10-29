@@ -1,0 +1,141 @@
+#!/bin/bash
+# Usage: brightness-tui
+# Screen brightness and night light in the terminal (opened from waybar's brightness module).
+# Keys: h/l or ←/→ (also j/k, ↓/↑) change brightness by 5%, H/L by 20%, 1-9 and 0 set
+# 10-100%, g/G go to the minimum/maximum; n toggles night light, [ / ] make it warmer/cooler;
+# Enter, q or Esc closes.
+# Mouse: click or drag on the bar to set brightness, scroll to change it by 5%; click the
+# night light line to toggle it, scroll on it to change its warmth.
+# Also follows changes made elsewhere, e.g. with the brightness keys.
+#
+# Night light is a background `gammastep -O TEMP` (the tint lasts as long as it runs, so it
+# stays on after this closes, until it's toggled off or you log out). The last temperature
+# is remembered in ~/.local/state/nightlight-temp.
+
+label='Brightness  '
+bar_x=$((2 + ${#label}))   # 0-based column where the bar starts
+bar_row=1                   # 0-based screen rows
+night_row=3
+temp_file=${XDG_STATE_HOME:-$HOME/.local/state}/nightlight-temp
+
+cleanup() { printf '\e[?1002l\e[?1006l'; tput cnorm; clear; }
+trap cleanup EXIT
+tput civis
+printf '\e[?1002h\e[?1006h'   # report clicks, drags and scrolling (SGR format)
+clear
+
+set_pct() {
+    local p=$1
+    [ "$p" -lt 1 ] && p=1   # 0% would turn the screen off
+    [ "$p" -gt 100 ] && p=100
+    brightnessctl -q set "$p%"
+}
+
+night_on() { pgrep -x gammastep >/dev/null; }
+
+night_start() {
+    pkill -x gammastep
+    setsid -f gammastep -O "$temp" >/dev/null 2>&1
+}
+
+# change the night light temperature by $1 kelvin (2500-6000), restarting it if it's on
+set_temp() {
+    temp=$((temp + $1))
+    [ "$temp" -lt 2500 ] && temp=2500
+    [ "$temp" -gt 6000 ] && temp=6000
+    mkdir -p "${temp_file%/*}" && echo "$temp" > "$temp_file"
+    night_on && night_start
+}
+
+toggle_night() {
+    if night_on; then pkill -x gammastep; else night_start; fi
+}
+
+temp=$(cat "$temp_file" 2>/dev/null)
+[ -z "$temp" ] && temp=4000
+
+draw() {
+    local filled lines state
+    pct=$(brightnessctl -m | cut -d, -f4 | tr -d '%')
+    width=$(($(tput cols) - bar_x - 8))
+    [ "$width" -lt 10 ] && width=10
+    filled=$((pct * width / 100))
+    tput cup "$bar_row" 2
+    printf '%s' "$label"
+    printf '%*s' "$filled" '' | tr ' ' '#'
+    printf '%*s' "$((width - filled))" '' | tr ' ' '-'
+    printf '  %3d%%' "$pct"
+
+    night_on && state='● on ' || state='○ off'
+    tput cup "$night_row" 2
+    printf 'Night light %s  %dK' "$state" "$temp"
+    tput el
+
+    lines=$(tput lines)
+    tput cup $((lines - 2)) 2
+    printf 'h/l ±5  H/L ±20  1-9,0 set  g/G min/max  click/drag/scroll the bar'
+    tput el
+    tput cup $((lines - 1)) 2
+    printf 'n night light  [/] warmer/cooler  enter/q close'
+    tput el
+}
+
+# Read one key into $key: a character, ESC, ENTER, UP/DOWN/LEFT/RIGHT, or MOUSE (with
+# $button, $mx and $my set). Returns 1 if nothing was pressed within a second.
+read_key() {
+    local c seq=
+    IFS= read -rsn1 -t 1 key || return 1
+    [ -z "$key" ] && { key=ENTER; return 0; }
+    [ "$key" != $'\e' ] && return 0
+    IFS= read -rsn1 -t 0.01 c || { key=ESC; return 0; }
+    [ "$c" != '[' ] && { key=ESC; return 0; }
+    IFS= read -rsn1 -t 0.01 c
+    case $c in
+        A) key=UP ;; B) key=DOWN ;; C) key=RIGHT ;; D) key=LEFT ;;
+        '<')   # mouse: ESC [ < button ; x ; y M (press) or m (release)
+            while IFS= read -rsn1 -t 0.05 c; do
+                [ "$c" = M ] || [ "$c" = m ] && break
+                seq+=$c
+            done
+            [ "$c" = m ] && { key=; return 0; }   # ignore releases
+            IFS=';' read -r button mx my <<< "$seq"
+            key=MOUSE ;;
+        *) key= ;;
+    esac
+}
+
+while true; do
+    draw
+    read_key || continue
+    case $key in
+        l | k | RIGHT | UP) set_pct $((pct + 5)) ;;
+        h | j | LEFT | DOWN) set_pct $((pct - 5)) ;;
+        L | K) set_pct $((pct + 20)) ;;
+        H | J) set_pct $((pct - 20)) ;;
+        [1-9]) set_pct $((key * 10)) ;;
+        0 | G) set_pct 100 ;;
+        g) set_pct 1 ;;
+        n | N) toggle_night ;;
+        '[') set_temp -250 ;;
+        ']') set_temp 250 ;;
+        ENTER | q | Q | ESC) exit 0 ;;
+        MOUSE)
+            # mouse rows are 1-based
+            if [ "$my" -eq $((night_row + 1)) ]; then
+                case $button in
+                    0) toggle_night ;;
+                    64) set_temp 250 ;;    # scroll up: cooler
+                    65) set_temp -250 ;;   # scroll down: warmer
+                esac
+            else
+                case $button in
+                    64) set_pct $((pct + 5)) ;;   # scroll up
+                    65) set_pct $((pct - 5)) ;;   # scroll down
+                    0 | 32)   # left click, or drag with the left button held, on the bar
+                        if [ "$my" -eq $((bar_row + 1)) ] && [ "$mx" -gt "$bar_x" ] && [ "$mx" -le $((bar_x + width)) ]; then
+                            set_pct $(((mx - bar_x) * 100 / width))
+                        fi ;;
+                esac
+            fi ;;
+    esac
+done

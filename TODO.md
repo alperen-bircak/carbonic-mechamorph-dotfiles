@@ -1,7 +1,18 @@
 # TODO
 
+- [ ] Switch from Ghostty to kitty (Ghostty's libadwaita styling, rounded animated toasts etc., feels off)
+  - Install kitty; add a `kitty` stow package (`kitty/.config/kitty/kitty.conf`) and add it to `packages` in the justfile
+  - Port `ghostty/.config/ghostty/config.ghostty`: font size 10.5, padding 8/6, no copy-on-select, `ctrl+enter` passed through to programs
+  - Port the Ayu themes (`themes/ayu-v9`, `themes/ayu-light-v9`) to kitty colour files, keeping the palette 0/7/8 fixes
+  - Point things at kitty: `$term` in the sway config (and the comment at line 43), `terminal` in `rofi/.config/rofi/config.rasi`, `com.mitchellh.ghostty` in `bin/.local/bin/super-menu`, the comment in `rofi/.config/rofi/themes/ayu.rasi`
+  - Then remove Ghostty: the `ghostty` stow package, `bin/.local/bin/ghostty-theme-tour`, and the two Ghostty theme items below (carry anything still wanted over to kitty)
 - [ ] Revisit the Ghostty `ayu-v9` theme (`ghostty/.config/ghostty/themes/ayu-v9`), built from the ayu palette v9.1.0
   - Background: keep `ui.bg` `#0d1017`, or try `editor.bg` `#10141c` or something darker (tried `#000000` and `#0a0000`, reverted)
   - Palette 0, 7 and 8 differ from upstream (black/brightBlack `#0a0000` were unreadable, white `#ffffff`): check they look right
   - Selection `#172e51` is `#3388ff40` blended by hand: check it against real use
   - Check for a newer ayu release
+- [ ] Finish the Ghostty theme tour: run `ghostty-theme-tour 1` (`bin/.local/bin/ghostty-theme-tour`) from the start; it shows all 464 themes, one per second (~8 min), name and number in a notification, then goes back to `ayu-v9`
+  - Got to theme 148 (Front End Delight) last time; `ghostty-theme-tour 1 149` resumes there
+  - Note any worth keeping; Gruvbox Dark was tried as an alternative to `ayu-v9`
+- [ ] Rethink the shell: currently bash (login shell `/usr/bin/bash`, `bash` stow package); zsh isn't installed
+  - Decide whether to stay on bash or move to zsh/fish/something else

@@ -1,0 +1,32 @@
+#!/bin/bash
+# Usage: disks-tui
+# Show the mounted filesystems (dysk's table) in the terminal, checked every 2 seconds,
+# so a drive plugged in or filled up shows without reopening (opened from the Super Menu).
+# Keys: a toggles all mount points (dysk -a), q or Esc closes.
+
+cleanup() { tput cnorm; clear; }
+trap cleanup EXIT
+tput civis
+clear
+
+# Redraw in place (no clear, which blinks), and only when the table changed
+draw() {
+    tput cup 1 2
+    printf 'Disks'
+    tput cup 3 0
+    sed 's/^/  /; s/$/\x1b[K/' <<< "$table"   # \e[K clears what's left of a longer old line
+    tput ed
+    tput cup $(($(tput lines) - 1)) 2
+    printf 'a all mount points  q close'
+}
+
+all= shown=
+while true; do
+    table=$(dysk --color yes $all)
+    [ "$table" != "$shown" ] && { draw; shown=$table; }
+    IFS= read -rsn1 -t 2 key || continue
+    case $key in
+        a) [ -z "$all" ] && all=-a || all= ;;
+        q | Q | $'\e') exit 0 ;;
+    esac
+done

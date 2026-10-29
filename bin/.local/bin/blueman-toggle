@@ -1,0 +1,25 @@
+#!/bin/sh
+# Usage: blueman-toggle
+# Open Blueman's device window, or close it if it's already open (waybar's bluetooth module
+# click). It also closes when focus moves to another window or workspace. Sway floats and
+# centres it (for_window rule in the sway config).
+swaymsg -q '[app_id="^blueman-manager$"] kill' 2>/dev/null && exit 0
+
+blueman-manager &
+
+# Watch focus changes. Blueman's own windows (pairing dialogs come from blueman-applet)
+# don't count; anything else closes it. Stop once its window is gone, e.g. closed by hand.
+shown=
+swaymsg -t subscribe -m '["window", "workspace"]' |
+    jq --unbuffered -r 'if .current then "workspace \(.change)" else "\(.change) \(.container.app_id)" end' |
+    while read -r change app; do
+        case "$change $app" in
+            "focus blueman"*) shown=1 ;;
+            focus* | "workspace focus")
+                [ -n "$shown" ] || continue
+                swaymsg -q '[app_id="^blueman-manager$"] kill'
+                exit ;;
+            "close blueman-manager")
+                swaymsg -t get_tree | jq -e '.. | objects | select(.app_id? == "blueman-manager")' >/dev/null || exit ;;
+        esac
+    done

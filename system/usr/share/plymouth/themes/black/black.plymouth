@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Black
+Description=Plain black screen
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/black
+ScriptFile=/usr/share/plymouth/themes/black/black.script

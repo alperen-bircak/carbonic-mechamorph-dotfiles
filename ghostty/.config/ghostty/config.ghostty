@@ -1,4 +1,23 @@
 # ghostty config; see `ghostty +show-config --default --docs` for all options
 
-# Ayu dark from the v9.1.0 palette (themes/ayu-v9); built-in "Ayu" is the older one
+# Ayu dark from the v9.1.0 palette (themes/ayu-v9; light is themes/ayu-light-v9);
+# built-in "Ayu" is the older one
 theme = ayu-v9
+
+# About 14px; the default 12pt (16px) felt too big next to Firefox
+font-size = 10.5
+
+# Small space between the text and the window edges
+window-padding-x = 8
+window-padding-y = 6
+window-padding-balance = true
+
+# No "cols × rows" popup when a window changes size (sway resizes them a lot)
+resize-overlay = never
+
+# Don't copy selected text to the selection clipboard; copy explicitly instead
+copy-on-select = false
+
+# Default ctrl+enter toggles fullscreen; pass it through to programs instead
+# (sway's $mod+f does fullscreen)
+keybind = ctrl+enter=unbind

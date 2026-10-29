@@ -9,6 +9,7 @@ Each top-level folder is a stow package laid out like `~`. For example, `sway/.c
 | `sway` | sway config |
 | `bash` | `.bashrc`, `.bash_profile` |
 | `bin` | scripts in `~/.local/bin` |
+| `gtklock` | lock screen config and style |
 | `system` | copies of root-owned files, not stowed (see `system/README.md`) |
 
 Run `just` to list the commands. The main ones:
@@ -18,5 +19,9 @@ Run `just` to list the commands. The main ones:
 - `just reload`: reload sway
 - `just gtk`: apply GTK settings, which live in dconf and can't be symlinked
 - `just system`: compare `system/` with the live files
+
+`helpers/` holds small tools that aren't configs and aren't stowed:
+
+- `helpers/bg-maker`: a hex-grid wallpaper maker (React app). `just bg-maker` opens it.
 
 Not tracked: htop, btop, bottom and `mimeapps.list`. Those apps replace their config file when they save, which would break the symlink.

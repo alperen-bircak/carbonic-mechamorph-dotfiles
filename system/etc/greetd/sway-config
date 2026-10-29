@@ -1,0 +1,11 @@
+# sway config for the nwg-hello login screen (greetd runs it as the greeter user)
+
+# Same keyboard layout and scale as the desktop
+input type:keyboard {
+    xkb_layout tr
+}
+output eDP-1 scale 1.8
+
+include /etc/sway/config.d/*
+
+exec "nwg-hello; swaymsg exit"

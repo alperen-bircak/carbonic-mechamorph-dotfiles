@@ -1,0 +1,95 @@
+// Ayu dark, same palette v9.1.0 colours as the kitty theme (kitty/.../themes/ayu-v9.conf)
+
+* {
+    bg:       #0d1017;  // ui.bg
+    bg-alt:   #10141c;  // surface.lift
+    fg:       #bfbdb6;  // editor.fg
+    fg-dim:   #5a6673;  // syntax.comment
+    accent:   #59c2ff;  // terminal bright blue, close to sway's focus border
+    selected: #172e51;  // editor.selection.active blended over bg
+    urgent:   #f07178;
+
+    font: "Adwaita Sans 11";
+    background-color: transparent;
+    text-color: @fg;
+}
+
+window {
+    width: 36em;
+    padding: 12px;
+    background-color: @bg;
+    border: 2px;
+    border-color: @accent;
+}
+
+mainbox {
+    spacing: 8px;
+    children: [ inputbar, message, listview ];
+}
+
+inputbar {
+    padding: 8px 10px;
+    spacing: 8px;
+    background-color: @bg-alt;
+    children: [ prompt, entry ];
+}
+
+prompt {
+    text-color: @accent;
+}
+
+entry {
+    placeholder: "Search";
+    placeholder-color: @fg-dim;
+    cursor: text;
+}
+
+message {
+    padding: 6px 10px;
+    background-color: @bg-alt;
+}
+
+listview {
+    lines: 8;
+    fixed-height: false;
+    scrollbar: false;
+    spacing: 2px;
+}
+
+element {
+    padding: 6px 10px;
+    spacing: 10px;
+    cursor: pointer;
+}
+
+element selected.normal {
+    background-color: @selected;
+}
+
+element normal.active,
+element alternate.active,
+element selected.active {
+    text-color: @accent;
+}
+
+element normal.urgent,
+element alternate.urgent,
+element selected.urgent {
+    text-color: @urgent;
+}
+
+element-icon {
+    size: 1.5em;
+    vertical-align: 0.5;
+    background-color: inherit;
+    cursor: inherit;
+}
+
+element-text {
+    vertical-align: 0.5;
+    background-color: inherit;
+    text-color: inherit;
+    cursor: inherit;
+    // Matched letters
+    highlight: bold #59c2ff;
+}

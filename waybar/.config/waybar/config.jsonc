@@ -1,0 +1,125 @@
+// -*- mode: jsonc -*-
+// Waybar config. Widths are set in style.css (see the comment there).
+{
+    "height": 30,
+    "spacing": 4, // gap between modules
+    "modules-left": [
+        "sway/workspaces",
+        "sway/mode",
+        "sway/scratchpad"
+    ],
+    "modules-center": [
+        "mpris"
+    ],
+    "modules-right": [
+        "tray",
+        "bluetooth",
+        "pulseaudio",
+        "network",
+        "backlight",
+        "battery",
+        "sway/language",
+        "clock"
+    ],
+
+    // Left
+    "sway/mode": {
+        // mode names are lowercase in the sway config; show them as "Resize"
+        "format": "<span text_transform=\"capitalize\">{}</span>"
+    },
+    "sway/scratchpad": {
+        "format": "{icon} {count}",
+        "show-empty": false,
+        "format-icons": ["", ""],
+        "tooltip": true,
+        "tooltip-format": "{app}: {title}"
+    },
+
+    // Center: what's playing in any MPRIS player (Firefox, Showtime, ...)
+    "mpris": {
+        "format": "{status_icon} {dynamic}",
+        "dynamic-len": 50,
+        "dynamic-order": ["title", "artist"],
+        "status-icons": {
+            "playing": "",
+            "paused": ""
+        }
+        // built-in clicks: left play/pause, middle previous, right next
+    },
+
+    // Right
+    "tray": {
+        "spacing": 10
+    },
+    "bluetooth": {
+        "align": 1,
+        "format": "{num_connections} 󰂯",
+        "format-off": "󰂲",
+        "format-disabled": "󰂲",
+        "format-connected": "{num_connections} 󰂱",
+        // used instead when a connected device reports its battery (the first such device)
+        "format-connected-battery": "{device_battery_percentage}% 󰂱",
+        "tooltip-format": "{controller_alias}\t{controller_address}",
+        "tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{device_enumerate}",
+        "tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
+        "tooltip-format-enumerate-connected-battery": "{device_alias}\t{device_address}\t{device_battery_percentage}%",
+        "on-click": "~/.local/bin/ephemeral-tui bluetui" // floating TUI, closes on a second click or unfocus
+    },
+    "pulseaudio": {
+        "align": 1,
+        "format": "{volume}% {icon}",
+        "format-bluetooth": "{volume}% {icon}",
+        "format-bluetooth-muted": "󰝟 {icon}",
+        "format-muted": "󰝟",
+        "format-icons": {
+            "headphone": "",
+            "hands-free": "󰋎",
+            "headset": "󰋎",
+            "phone": "",
+            "portable": "",
+            "car": "",
+            "default": ["", "", ""]
+        },
+        "on-click": "~/.local/bin/ephemeral-tui wiremix" // floating TUI, closes on a second click or unfocus
+    },
+    "network": {
+        "on-click": "~/.local/bin/ephemeral-tui wlctl", // floating TUI, closes on a second click or unfocus
+        "align": 1,
+        "format-wifi": "{signalStrength}% ",
+        "format-ethernet": "󰈀",
+        "format-linked": "󰈀 ⚠",
+        "format-disconnected": "󰖪",
+        "tooltip-format": "{ifname} via {gwaddr}",
+        "tooltip-format-wifi": "{essid} ({signalStrength}%)\n{ifname} via {gwaddr}",
+        "tooltip-format-ethernet": "{ipaddr}/{cidr}\n{ifname} via {gwaddr}"
+    },
+    "backlight": {
+        "on-click": "~/.local/bin/ephemeral-tui -s 72x7 brightness ~/.local/bin/brightness-tui", // floating TUI, closes on a second click or unfocus
+        "align": 1,
+        "format": "{percent}% {icon}",
+        "format-icons": ["", "", "", "", "", "", "", "", ""]
+    },
+    "sway/language": {
+        "on-click": "~/.local/bin/ephemeral-tui -s 60x7 keyboard ~/.local/bin/keyboard-tui", // floating TUI, closes on a second click or unfocus
+        "align": 0.5
+    },
+    "battery": {
+        "on-click": "~/.local/bin/ephemeral-tui battop", // floating TUI, closes on a second click or unfocus
+        "align": 1,
+        "states": {
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "{capacity}% {icon}",
+        "format-charging": "{capacity}% ",
+        "format-plugged": "{capacity}% ",
+        "format-icons": ["", "", "", "", ""]
+    },
+    // Turkish-style date and time, e.g. 29.10.2026 17:58; the calendar on hover is in Turkish
+    "clock": {
+        "align": 0.5,
+        "format": "{:%d.%m.%Y %H:%M}",
+        "locale": "tr_TR.UTF-8",
+        "tooltip-format": "<tt><small>{calendar}</small></tt>"
+    }
+}

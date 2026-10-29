@@ -1,0 +1,95 @@
+#!/bin/bash
+# Usage: keyboard-tui
+# Pick the keyboard layout in the terminal (opened from waybar's layout module).
+# Lists the layouts from sway's config (xkb_layout), marks the active one with ●.
+# Keys: j/k or ↓/↑ move, Space/l pick, Enter picks and closes, 1-9 pick that layout,
+# q or Esc closes.
+# Mouse: click a layout to pick it, scroll to move.
+# Also follows layout changes made elsewhere.
+
+cleanup() { printf '\e[?1000l\e[?1006l'; tput cnorm; clear; }
+trap cleanup EXIT
+tput civis
+printf '\e[?1000h\e[?1006h'   # report clicks and scrolling (SGR format)
+clear
+
+first_row=3   # 0-based screen row of the first layout
+cursor=-1     # selected row; starts on the active layout
+
+load() {
+    local info
+    info=$(swaymsg -t get_inputs | jq -r '[.[] | select(.type == "keyboard" and (.xkb_layout_names | length) > 0)][0]
+        | (.xkb_active_layout_index | tostring), .xkb_layout_names[]')
+    active=$(head -1 <<< "$info")
+    mapfile -t names < <(tail -n +2 <<< "$info")
+    [ "$cursor" -lt 0 ] && cursor=$active
+}
+
+pick() {
+    [ "$1" -ge 0 ] && [ "$1" -lt "${#names[@]}" ] || return
+    cursor=$1
+    swaymsg -q input type:keyboard xkb_switch_layout "$1"
+}
+
+draw() {
+    local i mark
+    tput cup 1 2
+    printf 'Keyboard layout'
+    for i in "${!names[@]}"; do
+        tput cup $((first_row + i)) 2
+        [ "$i" -eq "$active" ] && mark='●' || mark=' '
+        [ "$i" -eq "$cursor" ] && tput rev
+        printf ' %s %d  %-30s' "$mark" $((i + 1)) "${names[$i]}"
+        tput sgr0
+    done
+    tput cup $(($(tput lines) - 1)) 2
+    printf 'j/k move  space pick  enter pick+close  1-9 pick  q close'
+    tput el
+}
+
+# Read one key into $key: a character, ESC, ENTER, UP/DOWN/LEFT/RIGHT, or MOUSE (with
+# $button, $mx and $my set). Returns 1 if nothing was pressed within a second.
+read_key() {
+    local c seq=
+    IFS= read -rsn1 -t 1 key || return 1
+    [ -z "$key" ] && { key=ENTER; return 0; }
+    [ "$key" != $'\e' ] && return 0
+    IFS= read -rsn1 -t 0.01 c || { key=ESC; return 0; }
+    [ "$c" != '[' ] && { key=ESC; return 0; }
+    IFS= read -rsn1 -t 0.01 c
+    case $c in
+        A) key=UP ;; B) key=DOWN ;; C) key=RIGHT ;; D) key=LEFT ;;
+        '<')   # mouse: ESC [ < button ; x ; y M (press) or m (release)
+            while IFS= read -rsn1 -t 0.05 c; do
+                [ "$c" = M ] || [ "$c" = m ] && break
+                seq+=$c
+            done
+            [ "$c" = m ] && { key=; return 0; }   # ignore releases
+            IFS=';' read -r button mx my <<< "$seq"
+            key=MOUSE ;;
+        *) key= ;;
+    esac
+}
+
+while true; do
+    load
+    draw
+    read_key || continue
+    last=$((${#names[@]} - 1))
+    case $key in
+        j | DOWN) [ "$cursor" -lt "$last" ] && cursor=$((cursor + 1)) ;;
+        k | UP) [ "$cursor" -gt 0 ] && cursor=$((cursor - 1)) ;;
+        g) cursor=0 ;;
+        G) cursor=$last ;;
+        ' ' | l | RIGHT) pick "$cursor" ;;
+        ENTER) pick "$cursor"; exit 0 ;;
+        [1-9]) pick $((key - 1)) ;;
+        q | Q | ESC) exit 0 ;;
+        MOUSE)
+            case $button in
+                64) [ "$cursor" -gt 0 ] && cursor=$((cursor - 1)) ;;          # scroll up
+                65) [ "$cursor" -lt "$last" ] && cursor=$((cursor + 1)) ;;    # scroll down
+                0) pick $((my - 1 - first_row)) ;;                            # left click
+            esac ;;
+    esac
+done

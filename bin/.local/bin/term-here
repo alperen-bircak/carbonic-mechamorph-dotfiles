@@ -1,0 +1,12 @@
+#!/bin/sh
+# Usage: term-here  -- open a terminal in the focused terminal's directory
+# (Mod+Shift+Return). Falls back to ~ when the focused window has no shell.
+dir=$HOME
+pid=$(swaymsg -t get_tree | jq -r '.. | objects | select(.focused == true) | .pid // empty')
+if [ -n "$pid" ]; then
+    # The window's shell, skipping kitty's own helper processes
+    shell=$(pgrep -P "$pid" -x 'bash|zsh|fish|sh' | head -n 1)
+    cwd=$([ -n "$shell" ] && readlink "/proc/$shell/cwd")
+    [ -d "$cwd" ] && dir=$cwd
+fi
+exec kitty --directory "$dir"

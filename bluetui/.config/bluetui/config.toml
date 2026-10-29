@@ -1,0 +1,2 @@
+# Esc quits when no popup is open (opened from waybar with ephemeral-tui)
+esc_quit = true
