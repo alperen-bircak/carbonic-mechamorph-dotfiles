@@ -1,0 +1,38 @@
+# The theme everything is generated from. After editing, run `just theme-generate`, then `just theme-sync`.
+#
+# Ayu dark defaults for now, from the ayu palette v9.1.0 (`just ayu dark <token>`)
+# and the roles in THEME_MANIFEST.md. Tinty's own ayu-dark scheme is an older palette.
+system: "base24"
+name: "Ayu Carbon"
+author: "Ayu Theme (https://github.com/ayu-theme)"
+variant: "dark"
+palette:
+  # Backgrounds and grays, darkest to lightest
+  base00: "#121212" # editor.bg: main background
+  base01: "#181818" # ui.panel.bg: raised background
+  base02: "#1f1f1f" # ui.line: thin borders, selected items
+  base03: "#636363" # ui.fg: muted text
+  base04: "#717171" # palette.gray.l5: dim text
+  base05: "#bdbdbd" # editor.fg: main text
+  base06: "#dedede" # halfway between editor.fg and white; ayu has no token here
+  base07: "#ffffff" # terminal.brightWhite
+
+  # Accents
+  base08: "#e6495a" # terminal.red
+  base09: "#ff8f40" # syntax.keyword: ayu's orange
+  base0A: "#e89d37" # terminal.yellow
+  base0B: "#97c142" # terminal.green
+  base0C: "#84ceb5" # terminal.cyan
+  base0D: "#39bae6" # palette.indigo.l2: the accent, in place of terminal.blue
+  base0E: "#c385fe" # terminal.magenta
+  base0F: "#d95757" # common.error
+
+  # Base24 extras
+  base10: "#101010" # ui.bg: darkest background (bars, outer areas)
+  base11: "#010101" # surface.sunk
+  base12: "#f07178" # terminal.brightRed
+  base13: "#ffb454" # terminal.brightYellow
+  base14: "#aad94c" # terminal.brightGreen
+  base15: "#95e6cb" # terminal.brightCyan
+  base16: "#59c2ff" # terminal.brightBlue
+  base17: "#d2a6ff" # terminal.brightMagenta

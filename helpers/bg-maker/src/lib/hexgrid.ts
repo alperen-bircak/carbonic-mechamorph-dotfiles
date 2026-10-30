@@ -181,11 +181,8 @@ export function buildGrid(s: Settings): Grid {
     }
   }
 
-  // With no gap, grow each hex by half a pixel so neighbours overlap; otherwise
-  // the anti-aliased edges of two touching hexes let the background show
-  // through as a faint line.
-  const bleed = s.gap === 0 ? 0.5 * (2 / SQRT3) : 0;
-  const drawR = Math.max(0.5, r - s.gap / SQRT3) + bleed;
+  // With no gap, the hexes touch exactly; buildSvg covers the seams
+  const drawR = Math.max(0.5, r - s.gap / SQRT3);
   return {
     cells,
     shape: hexPath(drawR, angle, s.corner, sx, sy),

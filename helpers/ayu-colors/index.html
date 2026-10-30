@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <title>ayu colors</title>
+  </head>
+  <body>
+    <header class="top">
+      <div class="brand">
+        <img src="./favicon.svg" alt="" width="22" height="22" />
+        <h1>ayu colors</h1>
+        <span class="version" id="version"></span>
+      </div>
+      <label class="filter">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5" /><path d="m10.5 10.5 3 3" /></svg>
+        <input id="filter" type="search" placeholder="Filter by name or hex" autocomplete="off" spellcheck="false" />
+        <kbd>/</kbd>
+      </label>
+      <div class="copy-as" role="radiogroup" aria-label="Copy as" id="copy-as">
+        <span>Copy as</span>
+        <button type="button" role="radio" data-mode="hex">HEX</button>
+        <button type="button" role="radio" data-mode="rgb">RGB</button>
+        <button type="button" role="radio" data-mode="path">Path</button>
+      </div>
+    </header>
+    <main class="sheet" id="sheet"></main>
+    <p class="empty" id="empty" hidden>No colours match.</p>
+    <div class="tip" id="tip" role="tooltip" hidden></div>
+    <div class="toast" id="toast" aria-live="polite"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

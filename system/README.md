@@ -10,17 +10,23 @@ Run `just system` to see whether the live files still match these copies.
 | `boot/loader/loader.conf` | `timeout 0` to skip the boot menu (hold Space at boot to show it) |
 | `etc/systemd/system/ly@.service.d/exit-status.conf` | `SuccessExitStatus=15` because ly exits with 15 when stopped, which systemd counted as a failure at every shutdown |
 | `etc/mkinitcpio.conf` | `plymouth` in `HOOKS` so the splash starts early in boot |
-| `etc/plymouth/plymouthd.conf` | `Theme=black` |
-| `usr/share/plymouth/themes/black/` | Custom Plymouth theme: a plain black screen at boot and shutdown, covering all console text |
+| `etc/plymouth/plymouthd.conf` | `Theme=wallpaper` |
+| `usr/share/plymouth/themes/wallpaper/` | Custom Plymouth theme: the wallpaper at boot and shutdown, covering all console text. Its `ImageDir` is `/usr/local/share/backgrounds`, so the `plymouth` hook packs `hex.png` into the initramfs |
+| `usr/share/plymouth/themes/black/` | Custom Plymouth theme: a plain black screen. Not in use |
 | `etc/makepkg.conf` | `!debug` in `OPTIONS` so AUR builds don't make `-debug` packages |
 | `etc/greetd/config.toml` | Login screen: greetd runs nwg-hello inside sway, using `etc/greetd/sway-config` (greetd replaced ly; enabled with `systemctl enable greetd`) |
 | `etc/greetd/sway-config` | New file: sway config for the login screen, with the desktop's `tr` keyboard layout and `eDP-1` scale 1.8 |
 | `etc/polkit-1/rules.d/49-run0-grace.rules` | New file: like sudo's timestamp, run0 skips the password for 15 minutes in a terminal where `run0k` (the `bin` package's wrapper) last succeeded, using a file at `/run/run0-grace/<terminal id>`. Applies to wheel users in a local, active session only |
 | `usr/local/bin/run0-terminal` | New file: prints the terminal ID that the run0 rule and `run0k` use: the tty and session of the nearest parent process that has a terminal |
-| `etc/nwg-hello/nwg-hello.css` | New file: the default nwg-hello style with the background set to the desktop wallpaper (`Sway_Wallpaper_Blue_1920x1080.png`) |
+| `etc/nwg-hello/nwg-hello.css` | New file: Ayu Carbon login screen over the desktop wallpaper (`usr/local/share/backgrounds/hex.png`). The greeter user can't read `~/.config/theme`, so the colours are hex values; update them by hand after changing the scheme |
+| `etc/nwg-hello/nwg-hello.glade` | New file: nwg-hello's `template.glade` with `halign`, `valign` and `hexpand` on `form-wrapper`, so the form is centered. CSS can't set those. After an nwg-hello upgrade, check it against the packaged template |
+| `etc/nwg-hello/nwg-hello.json` | New file: the default config with `template-name` set to `nwg-hello.glade` |
+| `usr/local/share/backgrounds/hex.png` | New file: the wallpaper, used by sway, gtklock, nwg-hello and Plymouth. It's outside `~` so the login screen's greeter user can read it. Change it with `just update-background`, which also rebuilds the initramfs for Plymouth |
+| `etc/systemd/system/swayosd-libinput-backend.service.d/config-dir.conf` | New file: sets `XDG_CONFIG_DIRS` so the swayosd backend reads `usr/local/etc/xdg/swayosd/backend.toml` before the packaged `/etc/xdg` one, which upgrades overwrite |
+| `usr/local/etc/xdg/swayosd/backend.toml` | New file: `ignore_caps_lock_key = true`, so swayosd shows no Caps Lock popup (Caps Lock is Esc via sway's `xkb_options`) |
 
 Enabled services that don't come with a file here:
 
-- `swayosd-libinput-backend` (`systemctl enable --now swayosd-libinput-backend`): lets swayosd show Caps Lock and Num Lock popups. It runs as root because it reads the keyboard through libinput
+- `swayosd-libinput-backend` (`systemctl enable --now swayosd-libinput-backend`): lets swayosd show Num Lock popups (Caps Lock is ignored, see `backend.toml` above). It runs as root because it reads the keyboard through libinput
 
 To restore one, copy it back as root, for example `run0 cp system/etc/makepkg.conf /etc/makepkg.conf`.

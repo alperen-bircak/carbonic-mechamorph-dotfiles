@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Wallpaper
+Description=The desktop wallpaper
+ModuleName=script
+
+[script]
+ImageDir=/usr/local/share/backgrounds
+ScriptFile=/usr/share/plymouth/themes/wallpaper/wallpaper.script

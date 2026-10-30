@@ -1,10 +1,10 @@
-/* Ayu dark, same colours as the rofi theme (rofi/.../themes/ayu.rasi):
-   bg #0d1017, fg #bfbdb6, fg-dim #5a6673, accent #59c2ff */
+/* Ayu Carbon. @base00 and so on are in theme/.config/theme/swayosd.css. */
+@import url("../theme/swayosd.css");
 
 window#osd {
   border-radius: 0;
-  border: 2px solid #59c2ff;
-  background: alpha(#0d1017, 0.95);
+  border: none;
+  background: @base01;
 }
 
 window#osd #container {
@@ -13,22 +13,21 @@ window#osd #container {
 
 window#osd image,
 window#osd label {
-  color: #bfbdb6;
-  font-family: "Adwaita Sans";
-  font-feature-settings: "tnum";   /* same-width digits, so the percentage doesn't jiggle */
+  color: @base05;
+  font-family: "Fira Code";
 }
 
 /* Muted volume */
 window#osd progressbar:disabled,
 window#osd image:disabled {
-  opacity: 0.4;
+  color: @base03;
 }
 
 window#osd progressbar,
 window#osd segmentedprogress {
   min-height: 6px;
   border-radius: 0;
-  background: transparent;
+  background: none;
   border: none;
 }
 
@@ -38,7 +37,7 @@ window#osd segment {
   min-height: inherit;
   border-radius: inherit;
   border: none;
-  background: #5a6673;
+  background: @base02;
 }
 
 /* Filled part of the bar */
@@ -47,7 +46,7 @@ window#osd segment.active {
   min-height: inherit;
   border-radius: inherit;
   border: none;
-  background: #59c2ff;
+  background: @base05;
 }
 
 window#osd segment {

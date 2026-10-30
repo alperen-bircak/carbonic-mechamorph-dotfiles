@@ -1,0 +1,116 @@
+/* Ayu Carbon for GTK4 apps: libadwaita (Loupe, Showtime) reads the --variables,
+   plain GTK4 (pavucontrol) needs the widget rules further down. @base00 and so
+   on are in theme/.config/theme/gtk4.css. */
+@import url("../theme/gtk4.css");
+
+:root {
+    --window-bg-color: @base00;
+    --window-fg-color: @base05;
+    --view-bg-color: @base00;
+    --view-fg-color: @base05;
+    --headerbar-bg-color: @base01;
+    --headerbar-fg-color: @base05;
+    --headerbar-backdrop-color: @base01;
+    --sidebar-bg-color: @base01;
+    --sidebar-fg-color: @base05;
+    --sidebar-backdrop-color: @base01;
+    --secondary-sidebar-bg-color: @base01;
+    --secondary-sidebar-fg-color: @base05;
+    --secondary-sidebar-backdrop-color: @base01;
+    --card-bg-color: @base01;
+    --card-fg-color: @base05;
+    --dialog-bg-color: @base01;
+    --dialog-fg-color: @base05;
+    --popover-bg-color: @base01;
+    --popover-fg-color: @base05;
+    --thumbnail-bg-color: @base01;
+    --accent-bg-color: @base0D;
+    --accent-fg-color: @base00;
+    --accent-color: @base0D;
+    --destructive-bg-color: @base0F;
+    --error-bg-color: @base0F;
+    --error-color: @base0F;
+    --window-radius: 0;
+}
+
+/* Apps that look colours up by the old names, like Loupe's image background */
+@define-color window_bg_color @base00;
+@define-color window_fg_color @base05;
+@define-color view_bg_color @base00;
+@define-color view_fg_color @base05;
+
+* {
+    border-radius: 0;
+    box-shadow: none;
+    text-shadow: none;
+}
+
+window.background:not(#osd) {
+    background-color: @base00;
+    color: @base05;
+}
+
+notebook,
+notebook > stack,
+notebook > stack > *,
+scrolledwindow,
+viewport,
+list,
+row {
+    background-color: @base00;
+    color: @base05;
+}
+
+notebook > header,
+popover > contents,
+menubar {
+    background-color: @base01;
+    color: @base05;
+}
+
+button,
+dropdown > button {
+    background-color: @base01;
+    background-image: none;
+    color: @base05;
+    border-color: @base02;
+}
+
+entry {
+    background-color: @base00;
+    color: @base05;
+    border-color: @base02;
+}
+
+button:hover {
+    background-color: @base02;
+}
+
+scale > trough,
+progressbar > trough,
+levelbar > trough > block.empty {
+    background-color: @base02;
+    border: none;
+}
+
+scale > trough > highlight,
+progressbar > trough > progress,
+levelbar > trough > block.filled {
+    background-color: @base05;
+    border: none;
+}
+
+scale > trough > slider {
+    background-color: @base05;
+    background-image: none;
+    border: none;
+    outline: none;
+}
+
+separator {
+    background-color: @base02;
+}
+
+scrollbar > range > trough > slider {
+    background-color: @base03;
+}

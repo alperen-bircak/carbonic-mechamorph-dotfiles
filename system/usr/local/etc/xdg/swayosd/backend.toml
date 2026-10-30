@@ -1,0 +1,5 @@
+# swayosd-libinput-backend config (the packaged default is /etc/xdg/swayosd/backend.toml,
+# which upgrades overwrite; this copy is found first via the service's drop-in).
+[input]
+# Caps Lock is Esc (sway's xkb_options), so don't show a caps lock popup for it
+ignore_caps_lock_key = true

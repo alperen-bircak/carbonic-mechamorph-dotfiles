@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { HexColorPicker } from "react-colorful";
-import { hexToHsl, hslToHex, isHex, isLight, normalizeHex } from "../lib/color";
+import { hexToHsl, hslToHex, isHex, isLight, normalizeHex, parseHex } from "../lib/color";
 
 type EyeDropperCtor = new () => { open: () => Promise<{ sRGBHex: string }> };
 const EyeDropper = (window as unknown as { EyeDropper?: EyeDropperCtor }).EyeDropper;
@@ -56,13 +56,29 @@ function PickerBody({ value, onChange, children, onRemove }: {
 }) {
   const [text, setText] = useState(value);
   useEffect(() => setText(value), [value]);
+  const root = useRef<HTMLDivElement>(null);
+
+  // Ctrl+V anywhere in the picker (outside text fields) sets the colour
+  const change = useRef(onChange);
+  change.current = onChange;
+  useEffect(() => {
+    const paste = (e: ClipboardEvent) => {
+      const t = e.target as HTMLElement;
+      if (t.closest?.("input, textarea, [contenteditable]")) return;
+      if (!root.current || !stack[stack.length - 1]?.contains(root.current)) return;
+      const hex = parseHex(e.clipboardData?.getData("text") ?? "");
+      if (hex) { e.preventDefault(); change.current(hex); }
+    };
+    document.addEventListener("paste", paste);
+    return () => document.removeEventListener("paste", paste);
+  }, []);
   const hsl = hexToHsl(value);
   const recent = loadRecent();
 
   const setHsl = (k: "h" | "s" | "l", v: number) => onChange(hslToHex({ ...hsl, [k]: v }));
 
   return (
-    <div className="picker">
+    <div className="picker" ref={root}>
       <HexColorPicker color={value} onChange={onChange} />
       <div className="picker-row">
         <input
@@ -72,6 +88,15 @@ function PickerBody({ value, onChange, children, onRemove }: {
           onChange={(e) => {
             setText(e.target.value);
             if (isHex(e.target.value)) onChange(normalizeHex(e.target.value));
+          }}
+          onFocus={(e) => e.target.select()}
+          onPaste={(e) => {
+            // A pasted hex replaces the field instead of joining what's there
+            const hex = parseHex(e.clipboardData.getData("text"));
+            if (!hex) return;
+            e.preventDefault();
+            setText(hex);
+            onChange(hex);
           }}
           onBlur={() => setText(value)}
         />

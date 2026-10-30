@@ -22,16 +22,40 @@ require('nvim-tree').setup({
 
 vim.keymap.set('n', '<leader>e', '<cmd>NvimTreeToggle<cr>', { desc = 'Toggle file explorer' })
 
--- Close Neovim instead of leaving the tree alone once the last file window quits
+-- nvim-tree only picks up outside git changes (commits, staging) when the repo
+-- root is in the tree, so opened on a subfolder its git colours go stale.
+-- Check the repo's index and HEAD every second and reload the tree on a change.
+local git_stamp
+vim.uv.new_timer():start(1000, 1000, vim.schedule_wrap(function()
+  local api = require('nvim-tree.api')
+  local root = api.tree.is_visible() and vim.fs.root(vim.fn.getcwd(), '.git')
+  if not root then
+    git_stamp = nil -- reload as soon as it's shown again
+    return
+  end
+  local stamp = ''
+  for _, file in ipairs({ 'index', 'HEAD' }) do
+    local stat = vim.uv.fs_stat(root .. '/.git/' .. file)
+    stamp = stamp .. (stat and stat.mtime.sec .. '.' .. stat.mtime.nsec or '-') .. ' '
+  end
+  if git_stamp and stamp ~= git_stamp then
+    api.tree.reload()
+  end
+  git_stamp = stamp
+end))
+
+-- Close Neovim instead of leaving the tree alone once the last file window quits.
+-- Checked after the quit is done: closing the tree during QuitPre cancels a :qa.
 vim.api.nvim_create_autocmd('QuitPre', {
   group = vim.api.nvim_create_augroup('plugins.nvim-tree', {}),
   callback = function()
-    local tree = require('nvim-tree.api').tree
-    local wins = vim.tbl_filter(function(win)
-      return vim.api.nvim_win_get_config(win).relative == ''
-    end, vim.api.nvim_tabpage_list_wins(0))
-    if #wins == 2 and tree.is_visible() then
-      tree.close()
-    end
+    vim.schedule(function()
+      local wins = vim.tbl_filter(function(win)
+        return vim.api.nvim_win_get_config(win).relative == ''
+      end, vim.api.nvim_tabpage_list_wins(0))
+      if #wins == 1 and vim.bo[vim.api.nvim_win_get_buf(wins[1])].filetype == 'NvimTree' then
+        vim.cmd.quit()
+      end
+    end)
   end,
 })

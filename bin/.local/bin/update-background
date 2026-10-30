@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+# Usage: update-background [image.png | --file-picker]  -- set the gtklock, nwg-hello
+# and Plymouth background; with no image, reinstall the one in system/
+# All three read the same file, see system/README.md. sway does too, so the
+# desktop changes at the next sway reload.
+set -euo pipefail
+
+# Started from the Super Menu, PATH is sway's, without run0k
+PATH=$HOME/.local/bin:$PATH
+# The Super Menu's terminal closes when this ends, so a failure wouldn't show
+trap 'notify-send -i dialog-error-symbolic "Background not updated" "update-background failed"' ERR
+
+copy="$HOME/dotfiles/system/usr/local/share/backgrounds/hex.png"
+live=/usr/local/share/backgrounds/hex.png
+
+# Print the file chosen in the desktop portal's dialog, the one browsers use.
+# Python because the portal only answers the D-Bus connection that asked, so one
+# process has to do both, and gdbus can't.
+pick_image() {
+    python3 -I - <<'EOF'
+import os
+from urllib.parse import unquote
+
+from gi.repository import Gio, GLib
+
+token = "update_background"
+bus = Gio.bus_get_sync(Gio.BusType.SESSION)
+sender = bus.get_unique_name()[1:].replace(".", "_")
+loop = GLib.MainLoop()
+
+
+def on_response(_bus, _sender, _path, _interface, _signal, params):
+    status, results = params.unpack()
+    if status == 0:  # Otherwise cancelled
+        print(unquote(results["uris"][0].removeprefix("file://")))
+    loop.quit()
+
+
+# Listen before asking, so the answer can't be missed
+bus.signal_subscribe(
+    "org.freedesktop.portal.Desktop",
+    "org.freedesktop.portal.Request",
+    "Response",
+    f"/org/freedesktop/portal/desktop/request/{sender}/{token}",
+    None,
+    Gio.DBusSignalFlags.NONE,
+    on_response,
+)
+folder = os.path.expanduser("~/Pictures").encode() + b"\0"
+options = {
+    "handle_token": GLib.Variant("s", token),
+    "filters": GLib.Variant("a(sa(us))", [("PNG images", [(1, "image/png")])]),
+    "current_folder": GLib.Variant("ay", folder),
+}
+bus.call_sync(
+    "org.freedesktop.portal.Desktop",
+    "/org/freedesktop/portal/desktop",
+    "org.freedesktop.portal.FileChooser",
+    "OpenFile",
+    GLib.Variant("(ssa{sv})", ("", "Choose a background", options)),
+    None,
+    Gio.DBusCallFlags.NONE,
+    -1,
+)
+loop.run()
+EOF
+}
+
+if [ "${1:-}" = --file-picker ]; then
+    image=$(pick_image)
+    [ -n "$image" ] || exit 0   # Cancel
+else
+    image=${1:-$copy}
+fi
+
+# Plymouth can only load PNGs
+if [ "$(file -b --mime-type -- "$image")" != image/png ]; then
+    echo "update-background: $image isn't a PNG" >&2
+    exit 1
+fi
+
+[ "$image" -ef "$copy" ] || cp -- "$image" "$copy"
+run0k install -m 644 "$copy" "$live"
+
+# Plymouth reads the image from the initramfs
+run0k mkinitcpio -P
+
+notify-send -i preferences-desktop-wallpaper-symbolic "Background updated" \
+    "The desktop changes at the next sway reload"

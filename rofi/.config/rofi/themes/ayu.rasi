@@ -1,15 +1,17 @@
-// Ayu dark, same palette v9.1.0 colours as the kitty theme (kitty/.../themes/ayu-v9.conf)
+// Ayu Carbon. $base00 and so on are in theme/.config/theme/rofi.rasi.
+
+@import "~/.config/theme/rofi.rasi"
 
 * {
-    bg:       #0d1017;  // ui.bg
-    bg-alt:   #10141c;  // surface.lift
-    fg:       #bfbdb6;  // editor.fg
-    fg-dim:   #5a6673;  // syntax.comment
-    accent:   #59c2ff;  // terminal bright blue, close to sway's focus border
-    selected: #172e51;  // editor.selection.active blended over bg
-    urgent:   #f07178;
+    bg:       @base01;
+    bg-alt:   @base00;
+    fg:       @base05;
+    fg-dim:   @base03;
+    accent:   @base0D;
+    selected: @base02;
+    urgent:   @base0F;
 
-    font: "Adwaita Sans 11";
+    font: "Fira Code 11";
     background-color: transparent;
     text-color: @fg;
 }
@@ -18,8 +20,6 @@ window {
     width: 36em;
     padding: 12px;
     background-color: @bg;
-    border: 2px;
-    border-color: @accent;
 }
 
 mainbox {
@@ -35,7 +35,7 @@ inputbar {
 }
 
 prompt {
-    text-color: @accent;
+    text-color: @fg-dim;
 }
 
 entry {
@@ -91,5 +91,5 @@ element-text {
     text-color: inherit;
     cursor: inherit;
     // Matched letters
-    highlight: bold #59c2ff;
+    highlight: bold;
 }

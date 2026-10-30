@@ -1,28 +1,32 @@
-/* Dark rounded panel over the wallpaper, holding the clock and password box */
+/* Ayu Carbon: one solid rectangle over the wallpaper, holding the clock and
+   password box. @base00 and so on are in theme/.config/theme/gtklock.css. */
+@import url("../theme/gtklock.css");
+
 #window-box {
-    background-color: rgba(0, 0, 0, 0.55);
-    border-radius: 16px;
+    background-color: @base01;
     padding: 32px 48px;
 }
 
 #clock-label {
     font-size: 64px;
-    font-weight: bold;
-    color: white;
+    color: @base05;
 }
 
 #date-label {
     font-size: 18px;
-    color: rgba(255, 255, 255, 0.8);
+    color: @base03;
     margin-bottom: 16px;
 }
 
 #input-field {
     min-width: 280px;
     padding: 8px 12px;
-    border-radius: 8px;
+    background-color: @base00;
+    color: @base05;
+    border: none;
+    outline: none;
 }
 
 #error-label {
-    color: #ff6b6b;
+    color: @base0F;
 }

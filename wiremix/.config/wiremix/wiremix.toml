@@ -8,3 +8,14 @@ tab = "output"
 keybindings = [
   { key = "Esc", action = "Exit" },
 ]
+
+# Named ANSI colours, so these follow the terminal's palette. Blue is the
+# indigo accent, on the selection only; the bars stay gray.
+[themes.default]
+selector = { fg = "Blue" }
+tab_selected = { fg = "Blue" }
+tab_marker = { fg = "Blue" }
+volume_filled = { fg = "White" }
+meter_active = { fg = "White" }
+meter_center_active = { fg = "White" }
+dropdown_selected = { fg = "Blue", add_modifier = "REVERSED" }

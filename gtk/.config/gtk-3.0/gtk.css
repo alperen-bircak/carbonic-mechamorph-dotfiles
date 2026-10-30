@@ -1,0 +1,164 @@
+/* Ayu Carbon over Adwaita-dark, for GTK3 apps (Thunar, pavucontrol, Blueman,
+   polkit-gnome, gtklock, waybar). @base00 and so on are in
+   theme/.config/theme/gtk3.css. */
+@import url("../theme/gtk3.css");
+
+@define-color theme_bg_color @base00;
+@define-color theme_fg_color @base05;
+@define-color theme_base_color @base00;
+@define-color theme_text_color @base05;
+@define-color theme_selected_bg_color @base02;
+@define-color theme_selected_fg_color @base05;
+@define-color theme_unfocused_bg_color @base00;
+@define-color theme_unfocused_fg_color @base05;
+@define-color theme_unfocused_base_color @base00;
+@define-color theme_unfocused_text_color @base05;
+@define-color theme_unfocused_selected_bg_color @base02;
+@define-color theme_unfocused_selected_fg_color @base05;
+@define-color insensitive_bg_color @base00;
+@define-color insensitive_fg_color @base03;
+@define-color borders @base02;
+@define-color unfocused_borders @base02;
+
+* {
+    border-radius: 0;
+    box-shadow: none;
+    text-shadow: none;
+    -gtk-icon-shadow: none;
+    outline-color: @base03;
+}
+
+window,
+.background,
+dialog,
+stack,
+notebook > stack,
+scrolledwindow,
+viewport,
+list,
+row,
+.view,
+iconview,
+treeview.view,
+textview text {
+    background-color: @base00;
+    color: @base05;
+}
+
+/* Bars and panels sit one shade up from the content */
+headerbar,
+.titlebar,
+toolbar,
+menubar,
+statusbar,
+.sidebar,
+.sidebar .view,
+.sidebar row,
+.sidebar list,
+notebook > header,
+popover,
+popover > contents,
+menu,
+.menu,
+.context-menu,
+tooltip,
+.csd tooltip {
+    background-color: @base01;
+    background-image: none;
+    color: @base05;
+    border-color: @base02;
+}
+
+menuitem:hover,
+modelbutton:hover,
+row:hover,
+treeview.view:hover,
+button:hover {
+    background-color: @base02;
+    background-image: none;
+}
+
+:selected,
+.view:selected,
+treeview.view:selected,
+row:selected,
+iconview:selected,
+.sidebar row:selected,
+menuitem:selected,
+textview text selection,
+entry selection {
+    background-color: @base02;
+    color: @base05;
+}
+
+button,
+combobox button {
+    background-color: @base01;
+    background-image: none;
+    color: @base05;
+    border-color: @base02;
+}
+
+/* gtk.css outranks an app's own stylesheet, so this also sets gtklock's password box */
+entry,
+spinbutton {
+    background-color: @base00;
+    background-image: none;
+    color: @base05;
+    border-color: @base02;
+}
+
+entry:focus,
+spinbutton:focus {
+    border-color: @base03;
+}
+
+scrollbar,
+scrollbar trough {
+    background-color: @base00;
+    border: none;
+}
+
+scrollbar slider {
+    background-color: @base03;
+    border: none;
+}
+
+separator,
+paned > separator {
+    background-color: @base02;
+}
+
+/* Sliders and level bars, gray rather than Adwaita's blue */
+scale trough,
+progressbar trough,
+levelbar trough,
+levelbar block.empty {
+    background-color: @base02;
+    background-image: none;
+    border: none;
+}
+
+scale highlight,
+progressbar progress,
+levelbar block.filled,
+levelbar block.high,
+levelbar block.low {
+    background-color: @base05;
+    background-image: none;
+    border: none;
+}
+
+scale slider {
+    background-color: @base05;
+    background-image: none;
+    border: none;
+}
+
+check:checked,
+radio:checked,
+switch:checked {
+    background-color: @base03;
+    background-image: none;
+    border-color: @base03;
+}

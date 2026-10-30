@@ -1,21 +1,23 @@
--- Colorscheme: ayu dark, to match kitty's themes/ayu-v9.conf.
+-- Colorscheme: standard ayu dark from neovim-ayu, with no colour changes.
 vim.pack.add({ 'https://github.com/Shatur/neovim-ayu' })
 
--- neovim-ayu's background is #0b0e14; kitty's ayu-v9 uses #0d1017 (ui.bg).
--- Swap it in every highlight group so Neovim blends into kitty's padding.
-local ayu_bg, kitty_bg = 0x0b0e14, 0x0d1017
+vim.cmd.colorscheme('ayu-dark')
 
-vim.api.nvim_create_autocmd('ColorScheme', {
-  group = vim.api.nvim_create_augroup('plugins.colorscheme', {}),
-  pattern = 'ayu*',
+local group = vim.api.nvim_create_augroup('plugins.colorscheme', {})
+
+-- The terminal's padding shows around the editor, so it matches Neovim's
+-- background while Neovim runs. OSC 11 sets the terminal's background, OSC 111
+-- resets it to the configured one.
+vim.api.nvim_create_autocmd({ 'UIEnter', 'VimResume' }, {
+  group = group,
   callback = function()
-    for name, hl in pairs(vim.api.nvim_get_hl(0, {})) do
-      if hl.bg == ayu_bg then
-        hl.bg = kitty_bg
-        vim.api.nvim_set_hl(0, name, hl)
-      end
-    end
+    local bg = vim.api.nvim_get_hl(0, { name = 'Normal' }).bg
+    vim.api.nvim_ui_send(('\027]11;#%06x\027\\'):format(bg))
   end,
 })
-
-vim.cmd.colorscheme('ayu-dark')
+vim.api.nvim_create_autocmd({ 'VimLeavePre', 'VimSuspend' }, {
+  group = group,
+  callback = function()
+    vim.api.nvim_ui_send('\027]111\027\\')
+  end,
+})

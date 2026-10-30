@@ -1,0 +1,12 @@
+Window.SetBackgroundTopColor(0, 0, 0);
+Window.SetBackgroundBottomColor(0, 0, 0);
+
+# Cover the screen without stretching, like sway's `fill`
+image = Image("hex.png");
+scale = Math.Max(Window.GetWidth() / image.GetWidth(), Window.GetHeight() / image.GetHeight());
+width = image.GetWidth() * scale;
+height = image.GetHeight() * scale;
+
+sprite = Sprite(image.Scale(width, height));
+sprite.SetX(Window.GetX() + (Window.GetWidth() - width) / 2);
+sprite.SetY(Window.GetY() + (Window.GetHeight() - height) / 2);

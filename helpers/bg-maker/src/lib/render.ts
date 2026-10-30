@@ -11,6 +11,12 @@ export function buildSvg(s: Settings, grid: Grid = buildGrid(s)): string {
   out.push(`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">`);
   out.push("<defs>");
   out.push(`<path id="h" d="${grid.shape}"/>`);
+  // Fill layer with no gap: touching hexes leave a faint background line where
+  // their anti-aliased edges meet. A stroke in each hex's own colour overlaps
+  // the neighbours by 1 px and covers it; non-scaling keeps that 1 screen pixel
+  // at any zoom, so the scaled-down preview is seamless too.
+  const seams = s.gap === 0;
+  if (seams) out.push(`<path id="hs" d="${grid.shape}" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`);
   if (s.shading > 0) {
     // Light comes from lightAngle (0° = from above); coordinates are per hex box
     const a = (s.lightAngle * Math.PI) / 180;
@@ -28,10 +34,11 @@ export function buildSvg(s: Settings, grid: Grid = buildGrid(s)): string {
   out.push("</defs>");
   if (!s.transparentBg) out.push(`<rect width="100%" height="100%" fill="${s.background}"/>`);
 
-  const use = (x: number, y: number, attrs: string) => `<use href="#h" xlink:href="#h" x="${f(x)}" y="${f(y)}"${attrs}/>`;
+  const use = (x: number, y: number, attrs: string, id = "h") =>
+    `<use href="#${id}" xlink:href="#${id}" x="${f(x)}" y="${f(y)}"${attrs}/>`;
 
   out.push("<g>");
-  for (const c of grid.cells) out.push(use(c.x, c.y, ` fill="${c.fill}"`));
+  for (const c of grid.cells) out.push(seams ? use(c.x, c.y, ` fill="${c.fill}" stroke="${c.fill}"`, "hs") : use(c.x, c.y, ` fill="${c.fill}"`));
   out.push("</g>");
 
   if (s.shading > 0) {

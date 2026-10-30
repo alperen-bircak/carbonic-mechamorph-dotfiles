@@ -1,13 +1,17 @@
 #!/bin/sh
 # Usage: super-menu
-# Super Menu: a short rofi menu of favourite apps, opened by tapping Mod (Super) in sway.
-# Running it again while rofi is open closes rofi instead, so a second tap closes the menu.
+# Super Menu: a short rofi menu of favourite apps, opened by double-tapping Mod (Super) in sway.
+# Sway runs this on every tap: the first only notes the time, and a second within double_tap_ms
+# opens the menu. Running it while rofi is open closes rofi instead, so one tap closes the menu.
 # Apps are desktop ids (files in /usr/share/applications without .desktop), in menu order.
 # The last entry, Settings, opens a second menu with the TUIs that waybar's modules open
 # (same ephemeral-tui commands as the waybar clicks), plus a few one-shot commands.
 apps="thunar firefox kitty"
+double_tap_ms=400
 
 # Settings submenu: "Name|icon|command", in menu order
+# Background runs in plain kitty, not ephemeral-tui: tui-autoclose would kill it when the file
+# picker takes focus, and run0k needs a terminal to ask for the password only once.
 bin=$HOME/.local/bin
 settings="Bluetooth|bluetooth-active-symbolic|$bin/ephemeral-tui bluetui
 Sound|audio-volume-high-symbolic|$bin/ephemeral-tui wiremix
@@ -16,9 +20,19 @@ Brightness & night light|display-brightness-symbolic|$bin/ephemeral-tui -s 72x7 
 Keyboard layout|input-keyboard-symbolic|$bin/ephemeral-tui -s 60x7 keyboard $bin/keyboard-tui
 Battery|battery-symbolic|$bin/ephemeral-tui battop
 Disks|drive-harddisk-symbolic|$bin/ephemeral-tui -s 72x14 disks $bin/disks-tui
+Background|preferences-desktop-wallpaper-symbolic|kitty $bin/update-background --file-picker
 Unlock password|changes-allow-symbolic|$bin/unlock-password"
 
 pkill -x rofi && exit
+
+stamp=$XDG_RUNTIME_DIR/super-menu-tap
+now=$(date +%s%3N)
+last=$(cat "$stamp" 2>/dev/null)
+if [ $((now - ${last:-0})) -gt "$double_tap_ms" ]; then
+    echo "$now" > "$stamp"
+    exit
+fi
+rm -f "$stamp"
 
 # One "Name\0icon\x1fIcon" line per app, the format rofi uses for icons in dmenu mode
 list() {
@@ -38,7 +52,7 @@ list() {
 theme='
 mainbox { children: [ message, listview ]; }
 message { background-color: transparent; padding: 6px 0 10px 0; }
-textbox { horizontal-align: 0.5; text-color: @accent; }'
+textbox { horizontal-align: 0.5; text-color: @fg; }'
 menu() {
     rofi -dmenu -i -no-custom -format i -show-icons -markup -mesg "<b>$1</b>" -theme-str "$theme" \
         -kb-row-down 'Down,Control+n,j' -kb-row-up 'Up,Control+p,k' \

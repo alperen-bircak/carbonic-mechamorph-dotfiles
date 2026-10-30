@@ -1,9 +1,9 @@
 // rofi config; see `rofi -dump-config` for all options
 
 configuration {
-    // App icons: Adwaita for generic ones, apps' own icons come from hicolor
+    // App icons: Pixelitos, then apps' own icons from hicolor
     show-icons: true;
-    icon-theme: "Adwaita";
+    icon-theme: "pixelitos-dark";
 
     // Prompt text for each mode
     display-drun: "Apps";

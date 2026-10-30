@@ -26,6 +26,18 @@ export function normalizeHex(s: string): string {
   return rgbToHex(hexToRgb(s));
 }
 
+// Pull a hex colour out of pasted text: "ff8800", "0xff8800", "color: #FF8800;", "#ff8800cc".
+// Alpha is dropped. Bare digits only count when they are the whole text.
+export function parseHex(text: string): string | null {
+  const t = text.trim();
+  const m = t.match(/^(?:#|0x)?([0-9a-f]{3,8})$/i) ?? t.match(/#([0-9a-f]{3,8})\b/i);
+  if (!m) return null;
+  const h = m[1];
+  if (h.length === 3 || h.length === 6) return normalizeHex(h);
+  if (h.length === 4 || h.length === 8) return normalizeHex(h.slice(0, h.length - h.length / 4));
+  return null;
+}
+
 export function rgbToHsl({ r, g, b }: RGB): HSL {
   r /= 255; g /= 255; b /= 255;
   const max = Math.max(r, g, b), min = Math.min(r, g, b);

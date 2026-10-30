@@ -1,0 +1,275 @@
+/* Laid out like ayu's palette.svg: a label column, then one column per
+   theme on that theme's own background. */
+:root {
+  --page: #f3f4f6;
+  --label-bg: #fafafa;
+  --text: #5c6166;
+  --muted: #8a9199;
+  --line: #e7e9ec;
+  --accent: #fa8532;
+  --top-h: 60px;
+  --label-w: 190px;
+  --mono: "Iosevka", "Iosevka Term", "JetBrains Mono", ui-monospace, monospace;
+  color-scheme: light;
+  font: 13px/1.4 "Inter", "Adwaita Sans", -apple-system, "Segoe UI", system-ui, sans-serif;
+  color: var(--text);
+  background: var(--page);
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; }
+h1, p { margin: 0; }
+button, input { font: inherit; color: inherit; }
+[hidden] { display: none !important; }
+
+/* ---------- Top bar ---------- */
+
+.top {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: var(--top-h);
+  padding: 0 max(24px, calc((100vw - 1320px) / 2));
+  background: color-mix(in srgb, var(--page) 82%, transparent);
+  backdrop-filter: blur(12px) saturate(1.4);
+  border-bottom: 1px solid var(--line);
+}
+.brand { display: flex; align-items: center; gap: 10px; margin-right: auto; }
+.brand img { border-radius: 6px; }
+.brand h1 { font-size: 16px; font-weight: 650; color: #1c2029; letter-spacing: -0.01em; }
+.version {
+  font: 11px var(--mono);
+  color: var(--muted);
+  padding: 2px 7px;
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  background: #fff;
+}
+
+.filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 280px;
+  height: 34px;
+  padding: 0 8px 0 10px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.filter:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px #fa853226; }
+.filter svg { width: 14px; height: 14px; fill: none; stroke: var(--muted); stroke-width: 1.6; stroke-linecap: round; flex: none; }
+.filter input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; color: #1c2029; }
+.filter input::-webkit-search-cancel-button { display: none; }
+kbd {
+  font: 11px var(--mono);
+  color: var(--muted);
+  padding: 1px 6px;
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+}
+
+.copy-as {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+}
+.copy-as span { padding: 0 8px 0 6px; color: var(--muted); font-size: 12px; }
+.copy-as button {
+  height: 26px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  font-size: 12px;
+  font-weight: 550;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.copy-as button:hover { color: #1c2029; }
+.copy-as button[aria-checked="true"] { background: #1f2430; color: #ffcc66; }
+
+/* ---------- Sheet ---------- */
+
+.sheet {
+  max-width: 1320px;
+  margin: 28px auto 64px;
+  border-radius: 16px;
+  overflow: clip;
+  background: var(--label-bg);
+  box-shadow: 0 1px 2px #1c20290f, 0 12px 48px -12px #1c202933;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: var(--label-w) repeat(3, minmax(250px, 1fr));
+}
+.label {
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  font-size: 13px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.cell {
+  background: var(--col);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+}
+
+.row.head {
+  position: sticky;
+  top: var(--top-h);
+  z-index: 5;
+  height: 52px;
+}
+.row.head .label { font-weight: 650; background: var(--label-bg); }
+.row.head .cell { justify-content: center; }
+.theme-name { font-size: 12px; font-weight: 550; letter-spacing: 0.02em; opacity: 0.75; }
+
+.row.section .label {
+  padding-top: 28px;
+  padding-bottom: 10px;
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6c7380;
+}
+.row.head + .row.section .label { padding-top: 8px; }
+.row.foot { height: 24px; }
+
+/* ---------- Swatches ---------- */
+
+.swatch {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  background: var(--c);
+  color: var(--ink);
+  cursor: pointer;
+  /* A faint ring, so colours equal to the column background still show */
+  --ring: inset 0 0 0 1px color-mix(in srgb, var(--ink) 10%, transparent);
+  box-shadow: var(--ring);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.swatch:hover { transform: translateY(-1px); box-shadow: var(--ring), 0 6px 16px -6px #0006; z-index: 1; }
+.swatch:active { transform: translateY(0) scale(0.98); }
+.swatch:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.swatch .hex { font: 11px var(--mono); letter-spacing: 0.02em; pointer-events: none; }
+
+/* Palette rows: five steps, L1 (darkest) to L5 */
+.row.palette .cell { padding-top: 12px; padding-bottom: 6px; }
+.steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; width: 100%; }
+.step { display: grid; justify-items: center; gap: 4px; }
+.tile { aspect-ratio: 1; max-height: 64px; border-radius: 5px; }
+.tile .hex { font-size: 10px; text-transform: uppercase; opacity: 0; transition: opacity 0.12s; }
+.tile:hover .hex, .tile:focus-visible .hex { opacity: 1; }
+/* A step other tokens use (as on palette.svg) */
+.tile.used::after {
+  content: "";
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+.step-name { font: 9px var(--mono); color: #8a9199; letter-spacing: 0.04em; }
+
+/* Token rows: one wide bar with the hex inside */
+.row.token .cell { padding-top: 8px; padding-bottom: 8px; }
+.row.token .label { padding-top: 8px; padding-bottom: 8px; }
+.bar { height: 32px; border-radius: 5px; }
+
+/* Copy feedback and filter matches */
+.swatch.copied { animation: copied 0.5s ease; }
+@keyframes copied {
+  0% { box-shadow: var(--ring), 0 0 0 0 var(--c); }
+  100% { box-shadow: var(--ring), 0 0 0 10px transparent; }
+}
+.swatch.match { outline: 2px solid var(--accent); outline-offset: 2px; z-index: 1; }
+.swatch.match.tile .hex { opacity: 1; }
+
+.empty { text-align: center; color: var(--muted); margin: -40px 0 64px; }
+
+/* ---------- Tooltip and toast ---------- */
+
+.tip {
+  position: fixed;
+  z-index: 20;
+  min-width: 200px;
+  max-width: 340px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #0d1017f2;
+  color: #bfbdb6;
+  font-size: 12px;
+  box-shadow: 0 10px 30px -8px #000a;
+  pointer-events: none;
+  backdrop-filter: blur(6px);
+}
+.tip-head { color: #e6e1cf; font-weight: 550; }
+.tip-theme {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 0 6px;
+  border-radius: 4px;
+  background: #ffffff14;
+  color: #ffb454;
+  font-size: 11px;
+}
+.tip-values { display: flex; gap: 10px; margin-top: 6px; }
+.tip-values code, .toast code { font: 11.5px var(--mono); }
+.tip-note { margin-top: 6px; color: #aad94c; font: 11px var(--mono); }
+.tip-note span { color: #5a6378; margin-right: 6px; font-family: inherit; }
+.tip-hint { margin-top: 8px; color: #5a6378; font-size: 11px; }
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px 9px 10px;
+  border-radius: 99px;
+  background: #1f2430;
+  color: #cccac2;
+  box-shadow: 0 12px 32px -8px #0008;
+  transform: translate(-50%, 24px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.2), opacity 0.2s;
+}
+.toast.on { transform: translate(-50%, 0); opacity: 1; }
+.toast code { color: #ffcc66; }
+.toast-chip { width: 16px; height: 16px; border-radius: 50%; background: var(--c); box-shadow: inset 0 0 0 1px #ffffff26; }
+
+/* ---------- Narrow screens: scroll the sheet sideways ---------- */
+
+@media (max-width: 1000px) {
+  .filter { width: 180px; }
+  .copy-as span { display: none; }
+  .sheet { margin: 16px; overflow-x: auto; }
+  .row { width: max-content; min-width: 100%; }
+  .row.head { position: static; }
+}

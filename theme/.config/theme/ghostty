@@ -1,0 +1,47 @@
+# vim: ft=ghostty
+# Ayu Carbon theme for Ghostty
+# Scheme Author: Ayu Theme (https://github.com/ayu-theme)
+# Scheme System: base24
+# Template Author: Tinted Terminal (https://github.com/tinted-theming/tinted-terminal)
+
+# Color palette
+palette = 0=#121212
+palette = 1=#e6495a
+palette = 2=#97c142
+palette = 3=#e89d37
+palette = 4=#39bae6
+palette = 5=#c385fe
+palette = 6=#84ceb5
+palette = 7=#bdbdbd
+palette = 8=#636363
+palette = 9=#f07178
+palette = 10=#aad94c
+palette = 11=#ffb454
+palette = 12=#59c2ff
+palette = 13=#d2a6ff
+palette = 14=#95e6cb
+palette = 15=#ffffff
+palette = 16=#ff8f40
+palette = 17=#d95757
+palette = 18=#181818
+palette = 19=#1f1f1f
+palette = 20=#717171
+palette = 21=#dedede
+
+# Foreground & background colors
+background = #121212
+foreground = #bdbdbd
+cursor-color = #bdbdbd
+selection-background = #bdbdbd
+selection-foreground = #1f1f1f
+search-background = #e89d37
+search-foreground = #181818
+search-selected-background = #ff8f40
+search-selected-foreground = #181818
+
+# Set `macos-icon = custom-style` in your main configuration file to enable theming of the app icon.
+#
+# Set the ghost color to the lightest foreground:
+macos-icon-ghost-color = #ffffff
+# Replace the official icon's blue background with the designated bright blue color:
+macos-icon-screen-color = #59c2ff

@@ -24,7 +24,7 @@ just clean   # remove dist/ and node_modules/
 
 **Seamless tile**: makes the image wrap at its edges, so it repeats without a visible seam (for tiled desktop backgrounds or web page backgrounds). The grid needs a whole number of hex periods to fit the canvas exactly, so the app picks the period count that bends the hexes least, then scales them slightly to fit. A note shows the hex size and stretch it ended up with. Colours, holes and the smooth noise all wrap too. The *Tiled* preview shows 3 × 3 copies so you can check the seams. Tilt is limited to 0° (pointy top) or 30° (flat top) here, and linear and radial gradients don't wrap. The app warns you about both.
 
-**Grid**: hex size (centre to corner), gap (at 0, hexes overlap by half a pixel so no hairline seams show), rounded corners, and holes (a random share of hexes left out). Tilt is set with a dial that snaps to 5°, 15° or 30° steps, or free. Hold Shift while dragging to ignore the snap. Hexagons repeat every 60°, so 0–60° covers every look.
+**Grid**: hex size (centre to corner), gap (at 0, hexes overlap by a pixel so no hairline seams show, even in the scaled-down preview), rounded corners, and holes (a random share of hexes left out). Tilt is set with a dial that snaps to 5°, 15° or 30° steps, or free. Hold Shift while dragging to ignore the snap. Hexagons repeat every 60°, so 0–60° covers every look.
 
 **Colours**: a palette of up to 12 colours, with presets, a harmony generator (shades, analogous, complementary, split, triadic, pastel), and reverse and shuffle. The palette is spread over the hexes in one of these ways:
 - *Random*: each hex picks a palette colour
@@ -34,7 +34,7 @@ just clean   # remove dist/ and node_modules/
 
 Gradients blend in OKLab, so they stay clean in the middle. *Jitter* moves each hex a bit along the gradient for a ragged edge. *Hard bands* uses the palette colours as-is. The background shows through gaps and holes and can be transparent.
 
-Each colour picker has a 2D picker, a hex field, H/S/L sliders, recently used colours, and (in Chromium) an eyedropper.
+Each colour picker has a 2D picker, a hex field, H/S/L sliders, recently used colours, and (in Chromium) an eyedropper. Paste a hex code (Ctrl+V) anywhere in an open picker to set the colour; `#ff8800`, `ff8800`, `0xff8800`, `#f80` and lines like `color: #ff8800;` all work.
 
 **Variance**: random ± shifts in hue, saturation and lightness for each hex. *Grain → Clouds* blends per-hex randomness with smooth noise; *Cloud size* and *Cloud detail* (octaves) shape the noise. Everything comes from the seed, so the same settings always give the same image. The dice button or `R` rolls a new seed.
 

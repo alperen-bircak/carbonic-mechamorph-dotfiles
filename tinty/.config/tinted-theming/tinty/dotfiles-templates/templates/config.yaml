@@ -1,0 +1,24 @@
+# Templates for the apps tinted-theming's own repos can't reach: their older
+# base16-* repos (waybar, rofi, mako) don't render base24 schemes, and the rest
+# have no repo at all. `just theme-generate` copies this folder into tinty's data
+# folder before applying, so tinty never renders inside the dotfiles repo.
+
+css:
+  filename: themes/css/{{ scheme-system }}-{{ scheme-slug }}.css
+  supported-systems: [base24]
+
+sway:
+  filename: themes/sway/{{ scheme-system }}-{{ scheme-slug }}.conf
+  supported-systems: [base24]
+
+rofi:
+  filename: themes/rofi/{{ scheme-system }}-{{ scheme-slug }}.rasi
+  supported-systems: [base24]
+
+mako:
+  filename: themes/mako/{{ scheme-system }}-{{ scheme-slug }}.conf
+  supported-systems: [base24]
+
+swaynag:
+  filename: themes/swaynag/{{ scheme-system }}-{{ scheme-slug }}.conf
+  supported-systems: [base24]

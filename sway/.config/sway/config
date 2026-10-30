@@ -21,7 +21,7 @@ set $menu rofi -show drun
 ### Output configuration
 #
 # Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
-output * bg /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
+output * bg /usr/local/share/backgrounds/hex.png fill
 # Laptop panel is 3200x1800; 2x felt too zoomed in, 1.8 gives a 1777x1000 workspace
 output eDP-1 scale 1.8
 #
@@ -30,6 +30,23 @@ output eDP-1 scale 1.8
 #   output HDMI-A-1 resolution 1920x1080 position 1920,0
 #
 # You can get the names of your outputs by running: swaymsg -t get_outputs
+
+### Colours and font
+#
+# Ayu Carbon: $base00 and so on are in theme/.config/theme/sway.conf
+include ~/.config/theme/sway.conf
+font pango:Fira Code 10
+# Grays only: darker unfocused, lighter focused, indigo for where the next window opens
+# class                 border  bg      text    indicator child_border
+client.focused          $base03 $base01 $base05 $base0D   $base03
+client.focused_inactive $base02 $base00 $base03 $base02   $base02
+client.unfocused        $base02 $base00 $base03 $base02   $base02
+client.urgent           $base02 $base00 $base0F $base02   $base02
+client.placeholder      $base02 $base00 $base03 $base02   $base02
+client.background       $base00
+# swaynag has no include, so its whole config is a theme file
+set $swaynag swaynag -c ~/.config/theme/swaynag.conf
+swaynag_command $swaynag
 
 ### Gaps and borders
 #
@@ -51,6 +68,8 @@ for_window [app_id="thunar" title="^Rename "] floating enable
 for_window [app_id="^tui\."] floating enable
 # Float Blueman in the middle of the screen (opened from waybar's bluetooth with blueman-toggle)
 for_window [app_id="blueman-manager"] floating enable, resize set 800 500, move position center
+# Float update-background's file picker (it has no parent window, so it would tile)
+for_window [app_id="xdg-desktop-portal-gtk" title="^Choose a background$"] floating enable
 
 ### Idle configuration
 #
@@ -106,7 +125,7 @@ exec ~/.local/bin/tui-autoclose
 
     # Start your launcher
     bindsym $mod+d exec $menu
-    # Tap Mod on its own for the Super Menu (tap again to close it)
+    # Double-tap Mod on its own for the Super Menu (tap once to close it)
     bindsym --release Super_L exec ~/.local/bin/super-menu
 
     # Drag floating windows by holding down $mod and left mouse button.
@@ -120,7 +139,7 @@ exec ~/.local/bin/tui-autoclose
     bindsym $mod+Shift+c reload
 
     # Exit sway (logs you out of your Wayland session)
-    bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
+    bindsym $mod+Shift+e exec $swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
 #
 # Moving around:
 #
@@ -280,6 +299,8 @@ include /etc/sway/config.d/*
 
 input type:keyboard {
     xkb_layout tr,us
+    # Caps Lock is Esc (for Neovim); Shift+Caps Lock still toggles caps lock
+    xkb_options caps:escape_shifted_capslock
 }
 
 input type:touchpad {

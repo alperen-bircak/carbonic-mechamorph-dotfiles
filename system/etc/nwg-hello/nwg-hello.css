@@ -1,64 +1,71 @@
+/* Ayu Carbon, like gtklock: one solid rectangle over the wallpaper, holding the
+   clock, the session and user pickers and the password box. Colours are the
+   scheme's hex values, since the greeter user can't read ~/.config/theme:
+   base00 #121212, base01 #181818, base02 #1f1f1f, base03 #636363,
+   base05 #bdbdbd, base0F #d95757. Update them by hand after a scheme change. */
+* {
+	font-family: "Fira Code";
+	border-radius: 0;
+	box-shadow: none;
+	text-shadow: none;
+	color: #bdbdbd;
+}
+
 window {
-	background-image: url("/usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png"); background-size: cover; background-position: center
+	background-image: url("/usr/local/share/backgrounds/hex.png");
+	background-size: cover;
+	background-position: center
 }
 
 #form-wrapper {
-	background-color: rgba(0, 0, 0, 0.2)
+	background-color: #181818;
+	padding: 24px 0
 }
 
-entry {
-	background-color: rgba(255, 255, 255, 0.1);
-	border: 1px solid #eee;
-	border-radius: 18px;
-	padding: 12px
-}
-
+entry,
+combobox button,
 button {
-	background: rgba(255, 255, 255, 0.1) none;
-	border: 1px solid #eee;
-	border-radius: 18px;
-	padding: 12px
+	background: #121212 none;
+	border: none;
+	outline: none;
+	padding: 10px 12px
 }
 
-button:hover {
-	background-color: rgba(255, 255, 255, 0.2)
+button:hover,
+combobox button:hover {
+	background-color: #1f1f1f
 }
 
 #power-button {
-	border-radius: 18px;
-    background:none;
-    border: none;
+	background: none;
+	border: none;
+	padding: 8px
 }
 
-#power-button:hover {
-    background-color: rgba(255, 255, 255, 0.1)
-}
-
+#power-button:hover,
 #power-button:active {
-    background-color: rgba(255, 255, 0, 0.2)
+	background-color: #1f1f1f
+}
+
+check {
+	background: #121212 none;
+	border: none
+}
+
+check:checked {
+	background-color: #636363
 }
 
 #welcome-label {
-	font-size: 48px
+	font-size: 32px
 }
 
 #clock-label {
-	font-family: monospace;
-	font-size: 30px
+	font-size: 64px
 }
 
 #date-label {
-	font-size: 18px
+	font-size: 18px;
+	color: #636363
 }
 
-#form-label {
-}
-
-#form-combo {
-}
-
-#password-entry {
-}
-
-#login-button {
-}
