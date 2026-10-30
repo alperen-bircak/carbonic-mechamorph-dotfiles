@@ -94,6 +94,9 @@ exec wl-paste --watch cliphist store
 exec ~/.local/bin/tui-autoclose
 # Notify when the battery gets low (defaults: 15% and 5%)
 exec batsignal
+# Stop logind shutting down on the power key, so the binding below gets it. Ends with sway (swaymsg
+# exits when sway does), so the key still shuts down from the login screen.
+exec systemd-inhibit --what=handle-power-key --who=sway --why='sway binds the power key' swaymsg -t subscribe -m '["shutdown"]'
 
 ### Input configuration
 #
@@ -283,6 +286,10 @@ bindsym $mod+r mode "resize"
     # Special keys to adjust brightness, with an on-screen display (swayosd)
     bindsym --locked XF86MonBrightnessDown exec swayosd-client --brightness -5
     bindsym --locked XF86MonBrightnessUp exec swayosd-client --brightness +5
+
+    # Power key: opens the Power menu, a second press while it's open suspends. Not --locked, so
+    # the press that wakes the laptop doesn't open the menu behind the lock screen.
+    bindsym --no-repeat XF86PowerOff exec ~/.local/bin/super-menu power-key
 
     # Screenshots: saved to ~/Pictures/Screenshots and copied to the clipboard
     bindsym Print exec ~/.local/bin/screenshot

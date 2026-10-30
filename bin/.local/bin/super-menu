@@ -1,7 +1,8 @@
 #!/bin/sh
-# Usage: super-menu [power]
+# Usage: super-menu [power|power-key]
 # Super Menu: a short rofi menu of favourite apps, opened by double-tapping Mod (Super) in sway.
 # "super-menu power" goes straight to the Power submenu, for waybar's power button.
+# "super-menu power-key" does the same for the power key, but suspends if that submenu is open.
 # Sway runs this on every tap: the first only notes the time, and a second within double_tap_ms
 # opens the menu. Running it while rofi is open closes rofi instead, so one tap closes the menu.
 # Apps are desktop ids (files in /usr/share/applications without .desktop), in menu order.
@@ -33,6 +34,11 @@ Disks|drive-harddisk-symbolic|$bin/ephemeral-tui -s 72x14 disks $bin/disks-tui
 Light or dark theme|preferences-desktop-theme|$bin/theme-switch toggle
 Background|preferences-desktop-wallpaper-symbolic|kitty $bin/update-background --file-picker
 Unlock password|changes-allow-symbolic|$bin/unlock-password"
+
+if [ "$1" = power-key ]; then
+    pkill -f '^rofi .*<b>Power</b>' && exec systemctl suspend
+    set -- power
+fi
 
 pkill -x rofi && exit
 
