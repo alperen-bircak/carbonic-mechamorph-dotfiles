@@ -15,6 +15,7 @@ require('config.options')
 require('config.keymaps')
 require('config.autocmds')
 require('config.lsp')
+require('config.session')
 
 require('plugins.colorscheme')
 require('plugins.treesitter')
