@@ -92,8 +92,8 @@ exec udiskie
 exec wl-paste --watch cliphist store
 # Close the waybar TUIs (ephemeral-tui) when you click another window
 exec ~/.local/bin/tui-autoclose
-# Notify when the battery reaches 15%, 10% and 5%
-exec ~/.local/bin/battery-notify
+# Notify when the battery reaches 15%, 10% and 5% (levels are in ~/.config/batsignal)
+exec batsignal
 
 ### Cursor
 #

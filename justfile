@@ -1,5 +1,5 @@
 # Stow packages that get symlinked into ~
-packages := "sway bash bin ghostty kitty foot gtk mako gtklock rofi waybar bluetui wlctl wiremix swayosd nvim tinty theme"
+packages := "sway bash bin batsignal ghostty kitty foot gtk mako gtklock rofi waybar bluetui wlctl wiremix swayosd nvim tinty theme"
 
 # List recipes
 default:

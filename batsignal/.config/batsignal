@@ -1,0 +1,18 @@
+# Battery notifications at 15%, 10% and 5%; they stay until dismissed. See batsignal(1).
+# Check every 60s. Without the +, it waits longer the further the next level is, so a
+# fast drain could get past a level before the next check.
+-m
++60
+-w
+15
+-W
+Battery at 15%
+-c
+10
+-C
+Battery at 10%
+-d
+5
+# The danger level runs this instead of showing a message
+-D
+notify-send -u critical -t 0 -a batsignal "Battery at 5%"
