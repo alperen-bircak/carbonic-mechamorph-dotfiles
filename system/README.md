@@ -14,6 +14,7 @@ Run `just system` to see whether the live files still match these copies.
 | `etc/makepkg.conf` | `!debug` in `OPTIONS` so AUR builds don't make `-debug` packages |
 | `etc/greetd/config.toml` | Login screen: greetd runs nwg-hello inside sway, using `etc/greetd/sway-config` (enabled with `systemctl enable greetd`) |
 | `etc/greetd/sway-config` | New file: sway config for the login screen, with the desktop's `tr` keyboard layout and `eDP-1` scale 1.8 |
+| `etc/pam.d/greetd` | `pam_gnome_keyring.so` in `auth` and `session`, so login unlocks the keyring and apps don't prompt for it. The keyring password must match the login password |
 | `etc/polkit-1/rules.d/49-run0-grace.rules` | New file: like sudo's timestamp, run0 skips the password for 15 minutes in a terminal where `run0k` (the `bin` package's wrapper) last succeeded, using a file at `/run/run0-grace/<terminal id>`. Applies to wheel users in a local, active session only |
 | `usr/local/bin/run0-terminal` | New file: prints the terminal ID that the run0 rule and `run0k` use: the tty and session of the nearest parent process that has a terminal |
 | `etc/nwg-hello/nwg-hello.css` | New file: Ayu Carbon login screen over the desktop wallpaper (`usr/local/share/backgrounds/hex.png`). The greeter user can't read `~/.config/theme`, so the colours are hex values; update them by hand after changing the scheme |
