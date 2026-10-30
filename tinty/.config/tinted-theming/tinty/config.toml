@@ -19,14 +19,8 @@ themes-dir = "themes/kitty"
 supported-systems = ["base16", "base24"]
 allow-dirty-update = true
 
-# Item names must be unique, and tinted-terminal is a large repo, so these share
+# Item names must be unique, and tinted-terminal is a large repo, so this shares
 # the kitty item's clone.
-[[items]]
-name = "tinted-terminal-ghostty"
-path = "~/.local/share/tinted-theming/tinty/repos/tinted-terminal"
-themes-dir = "themes/ghostty"
-supported-systems = ["base16", "base24"]
-
 [[items]]
 name = "tinted-terminal-foot"
 path = "~/.local/share/tinted-theming/tinty/repos/tinted-terminal"

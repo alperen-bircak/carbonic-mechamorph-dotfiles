@@ -1,6 +1,6 @@
 ---
 name: ayu-color
-description: Look up exact ayu theme colours (light, mirage, dark) from the official `ayu` npm package instead of guessing hex values. Use whenever a config, theme, stylesheet or script needs an ayu colour — e.g. styling sway, waybar, rofi, mako, gtklock, kitty, ghostty or nvim — or when asked "what's the ayu X colour", or to find which ayu token a hex value is.
+description: Look up exact ayu theme colours (light, mirage, dark) from the official `ayu` npm package instead of guessing hex values. Use whenever a config, theme, stylesheet or script needs an ayu colour — e.g. styling sway, waybar, rofi, mako, gtklock, kitty or nvim — or when asked "what's the ayu X colour", or to find which ayu token a hex value is.
 ---
 
 # ayu colours

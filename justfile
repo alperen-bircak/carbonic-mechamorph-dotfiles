@@ -1,5 +1,5 @@
 # Stow packages that get symlinked into ~
-packages := "sway bash bin ghostty kitty foot gtk mako gtklock rofi waybar bluetui wlctl wiremix swayosd nvim tinty theme"
+packages := "sway bash bin kitty foot gtk mako gtklock rofi waybar bluetui wlctl wiremix swayosd nvim tinty theme"
 
 # List recipes
 default:
@@ -116,8 +116,8 @@ tinty-install version="0.35.0":
     sha256sum -c "$name.sha256"
     tar xzf "$name.tar.gz" tinty
     install -m755 tinty ~/.local/bin/tinty
-    # tinty refuses to run while a local `path` in its config is missing: the ghostty
-    # and foot items point at this clone, the others at the templates copy
+    # tinty refuses to run while a local `path` in its config is missing: the foot
+    # item points at this clone, the others at the templates copy
     repo=${XDG_DATA_HOME:-$HOME/.local/share}/tinted-theming/tinty/repos/tinted-terminal
     [ -d "$repo" ] || git clone https://github.com/tinted-theming/tinted-terminal "$repo"
     cd {{justfile_directory()}}
@@ -142,7 +142,6 @@ theme-generate app="all" theme="ayu-carbon": _tinty-templates
     # Each app's file in the repo, and the tinty output it starts from
     declare -A sources=(
         [kitty.conf]=tinted-terminal-themes-kitty-file.conf
-        [ghostty]=tinted-terminal-ghostty-themes-ghostty-file
         [foot.ini]=tinted-terminal-foot-themes-foot-file.ini
         [sway.conf]=dotfiles-sway-themes-sway-file.conf
         [swaynag.conf]=dotfiles-swaynag-themes-swaynag-file.conf
