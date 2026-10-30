@@ -49,6 +49,8 @@ vim.api.nvim_create_autocmd('LspAttach', {
     local function map(lhs, rhs, desc)
       vim.keymap.set('n', lhs, rhs, { buffer = ev.buf, desc = desc })
     end
+    map('gd', vim.lsp.buf.definition, 'Go to definition')
+    map('gD', vim.lsp.buf.declaration, 'Go to declaration')
     map('<leader>lf', vim.lsp.buf.format, 'Format buffer')
     map('<leader>lr', '<cmd>lsp restart<cr>', 'Restart server')
     map('<leader>li', '<cmd>checkhealth vim.lsp<cr>', 'Server info')
