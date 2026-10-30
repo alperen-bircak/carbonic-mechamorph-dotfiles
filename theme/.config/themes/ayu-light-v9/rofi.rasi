@@ -1,0 +1,27 @@
+// Ayu Light v9: colours for the rofi theme
+* {
+    base00: #fcfcfc;
+    base01: #fafafa;
+    base02: #e7eaed;
+    base03: #828e9f;
+    base04: #6f7782;
+    base05: #5c6166;
+    base06: #2e3033;
+    base07: #000000;
+    base08: #f07171;
+    base09: #fa8532;
+    base0A: #eba400;
+    base0B: #86b300;
+    base0C: #4cbf99;
+    base0D: #4ca3c1;
+    base0E: #a37acc;
+    base0F: #e65050;
+    base10: #f8f9fa;
+    base11: #ebeef0;
+    base12: #f07171;
+    base13: #eba400;
+    base14: #86b300;
+    base15: #4cbf99;
+    base16: #22a4e6;
+    base17: #a37acc;
+}

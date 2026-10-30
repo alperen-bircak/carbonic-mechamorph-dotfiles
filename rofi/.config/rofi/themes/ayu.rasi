@@ -1,4 +1,4 @@
-// Ayu Carbon. $base00 and so on are in theme/.config/theme/rofi.rasi.
+// The look of rofi. @base00 and so on are in ~/.config/theme/rofi.rasi, the active theme.
 
 @import "~/.config/theme/rofi.rasi"
 

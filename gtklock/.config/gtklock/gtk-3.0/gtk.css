@@ -1,0 +1,4 @@
+/* ~/.config/gtk-3.0/gtk.css for the lock screen (see bin/.local/bin/lock): Ayu Carbon,
+   not the active theme. */
+@import url("../../themes/ayu-carbon/gtk3.css");
+@import url("../../gtk-3.0/widgets.css");

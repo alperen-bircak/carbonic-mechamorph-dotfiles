@@ -1,6 +1,7 @@
 /* Ayu Carbon: one solid rectangle over the wallpaper, holding the clock and
-   password box. @base00 and so on are in theme/.config/theme/gtklock.css. */
-@import url("../theme/gtklock.css");
+   password box. The lock screen stays Ayu Carbon whatever the desktop's theme is, so
+   this names it; @base00 and so on are in ~/.config/themes/ayu-carbon/gtklock.css. */
+@import url("../themes/ayu-carbon/gtklock.css");
 
 #window-box {
     background-color: @base01;

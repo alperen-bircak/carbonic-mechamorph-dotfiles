@@ -20,8 +20,8 @@ set $menu rofi -show drun
 
 ### Output configuration
 #
-# Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
-output * bg /usr/local/share/backgrounds/hex.png fill
+# Wallpaper and cursor, from the active theme
+include ~/.config/theme/desktop.conf
 # Laptop panel is 3200x1800; 2x felt too zoomed in, 1.8 gives a 1777x1000 workspace
 output eDP-1 scale 1.8
 #
@@ -33,10 +33,10 @@ output eDP-1 scale 1.8
 
 ### Colours and font
 #
-# Ayu Carbon: $base00 and so on are in theme/.config/theme/sway.conf
+# $base00 and so on are in ~/.config/theme/sway.conf, the active theme
 include ~/.config/theme/sway.conf
 font pango:Fira Code 10
-# Grays only: darker unfocused, lighter focused, indigo for where the next window opens
+# Grays only: subtle unfocused, stronger focused, indigo for where the next window opens
 # class                 border  bg      text    indicator child_border
 client.focused          $base03 $base01 $base05 $base0D   $base03
 client.focused_inactive $base02 $base00 $base03 $base02   $base02
@@ -75,9 +75,9 @@ for_window [app_id="xdg-desktop-portal-gtk" title="^Choose a background$"] float
 #
 # Lock after 5 minutes idle, turn displays off after 10, lock before suspend.
 exec swayidle -w \
-         timeout 300 'gtklock -d' \
+         timeout 300 '~/.local/bin/lock' \
          timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
-         before-sleep 'gtklock -d'
+         before-sleep '~/.local/bin/lock'
 
 ### Autostart
 #
@@ -94,11 +94,6 @@ exec wl-paste --watch cliphist store
 exec ~/.local/bin/tui-autoclose
 # Notify when the battery gets low (defaults: 15% and 5%)
 exec batsignal
-
-### Cursor
-#
-# Installed by `just cursor-install`; `just gtk` sets the same theme for GTK apps
-seat seat0 xcursor_theme Bibata-Original-Classic 28
 
 ### Input configuration
 #

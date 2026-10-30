@@ -1,0 +1,5 @@
+// Ayu Light v9: the rofi settings that change with the theme
+configuration {
+    // App icons: Pixelitos, then apps' own icons from hicolor
+    icon-theme: "pixelitos-light";
+}

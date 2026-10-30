@@ -17,6 +17,7 @@
         "pulseaudio",
         "network",
         "backlight",
+        "custom/theme",
         "battery",
         "sway/language",
         "clock",
@@ -99,6 +100,15 @@
         "align": 1,
         "format": "{percent}% {icon}",
         "format-icons": ["", "", "", "", "", "", "", "", ""]
+    },
+    // Moon or sun for the active theme. Sway restarts waybar on a switch, so this runs once;
+    // swaymsg exec because that restart would otherwise end the switch halfway.
+    "custom/theme": {
+        "exec": "sed -n 's/^WAYBAR_ICON=//p' ~/.config/theme/theme.env",
+        "interval": "once",
+        "on-click": "swaymsg exec '~/.local/bin/theme-switch toggle'",
+        "align": 0.5,
+        "tooltip": false
     },
     "sway/language": {
         "on-click": "~/.local/bin/ephemeral-tui -s 60x7 keyboard ~/.local/bin/keyboard-tui", // floating TUI, closes on a second click or unfocus

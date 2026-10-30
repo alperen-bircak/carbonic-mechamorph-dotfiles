@@ -21,4 +21,5 @@ require('plugins.treesitter')
 require('plugins.mini-icons') -- before which-key, which picks it up
 require('plugins.which-key')
 require('plugins.nvim-tree')
+require('plugins.telescope')
 require('plugins.claudecode')

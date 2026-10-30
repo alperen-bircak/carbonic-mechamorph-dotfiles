@@ -1,7 +1,7 @@
 # tinty config; see https://github.com/tinted-theming/tinty
 #
 # Tinty only generates: `just theme-generate` copies what it renders here into
-# theme/.config/theme, and apps read those files, never tinty's own folder
+# theme/.config/themes/<theme>, and apps read those files, never tinty's own folder
 # (~/.local/share/tinted-theming/tinty). No hooks: reloading is `just theme-sync`.
 
 default-scheme = "base24-ayu-carbon"
@@ -62,4 +62,16 @@ supported-systems = ["base24"]
 name = "dotfiles-swaynag"
 path = "~/.local/share/tinted-theming/tinty/dotfiles-templates"
 themes-dir = "themes/swaynag"
+supported-systems = ["base24"]
+
+[[items]]
+name = "dotfiles-rofi-config"
+path = "~/.local/share/tinted-theming/tinty/dotfiles-templates"
+themes-dir = "themes/rofi-config"
+supported-systems = ["base24"]
+
+[[items]]
+name = "dotfiles-shell"
+path = "~/.local/share/tinted-theming/tinty/dotfiles-templates"
+themes-dir = "themes/shell"
 supported-systems = ["base24"]

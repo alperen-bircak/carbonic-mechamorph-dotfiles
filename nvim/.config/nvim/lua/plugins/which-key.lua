@@ -9,6 +9,7 @@ wk.setup({
   spec = {
     { '<leader>a', group = 'Claude' },
     { '<leader>d', group = 'Diagnostics' },
+    { '<leader>f', group = 'Find' },
     { '<leader>l', group = 'LSP' },
   },
 })

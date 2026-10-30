@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+# Usage: theme-switch [toggle|dark|light|reapply|THEME]
+# Switch the desktop's theme: toggle (the default) between Ayu Carbon and Ayu Light, name one,
+# or reapply the active one after editing it. ~/.config/theme is a symlink to the active theme
+# in ~/.config/themes, so apps need no changes. Needs nothing beyond what the desktop runs.
+# The lock screen, login screen and Plymouth stay as they are.
+# Open GTK apps need a restart for the new colours, and so do foot and open shells.
+set -euo pipefail
+
+themes=$HOME/.config/themes
+active=$HOME/.config/theme
+dark=ayu-carbon
+light=ayu-light-v9
+
+# Rapid clicks on waybar's button: the first wins, the rest do nothing
+exec 9>"$XDG_RUNTIME_DIR/theme-switch.lock"
+flock -n 9 || exit 0
+
+current=$(basename "$(readlink "$active")")
+case ${1:-toggle} in
+    toggle)  [ "$current" = "$dark" ] && target=$light || target=$dark ;;
+    dark)    target=$dark ;;
+    light)   target=$light ;;
+    reapply) target=$current ;;
+    *)       target=$1 ;;
+esac
+if [ ! -f "$themes/$target/theme.env" ]; then
+    echo "no such theme: $target; pick one of: $(ls "$themes" | xargs)" >&2
+    exit 1
+fi
+
+# Replace the link in one step, so nothing can read a missing theme
+ln -s "themes/$target" "$active.new"
+mv -T "$active.new" "$active"
+
+. "$active/theme.env"
+read -r _ _ _ cursor cursor_size < <(grep '^seat ' "$active/desktop.conf")
+
+# color-scheme is what GTK4, libadwaita, browsers and Electron read through xdg-desktop-portal;
+# GTK3 ignores it and needs gtk-theme
+gtk=org.gnome.desktop.interface
+gsettings set "$gtk" color-scheme "$COLOR_SCHEME"
+gsettings set "$gtk" gtk-theme "$GTK_THEME_NAME"
+gsettings set "$gtk" icon-theme "$ICON_THEME"
+gsettings set "$gtk" cursor-theme "$cursor"
+gsettings set "$gtk" cursor-size "$cursor_size"
+
+# Sway's colours, wallpaper and cursor. Also restarts waybar; don't signal it here, it isn't
+# ready for USR2 yet.
+swaymsg -q reload
+makoctl reload || true
+pkill -USR1 -x kitty || true
+pkill -USR2 -x ghostty || true
+
+# These only read their style at startup
+if pkill -x swayosd-server; then
+    swaymsg -q exec swayosd-server
+fi
+if pkill -x polkit-gnome-au; then
+    swaymsg -q exec /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
+fi
+systemctl --user try-restart xdg-desktop-portal-gtk
+
+# After kitty, whose reload would undo Neovim's background
+sleep 0.3
+for socket in "$XDG_RUNTIME_DIR"/nvim.*.0; do
+    [ -S "$socket" ] || continue
+    nvim --server "$socket" --remote-expr \
+        'luaeval("require(\"plugins.colorscheme\").apply()")' >/dev/null || true
+done

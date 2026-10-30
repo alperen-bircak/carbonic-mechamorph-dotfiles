@@ -11,6 +11,10 @@ alias fetch='fastfetch'
 PS1='[\u@\h \W]\$ '
 export PATH="$HOME/.local/bin:$PATH"
 
+# fzf's colours follow the active theme
+. ~/.config/theme/theme.env
+export FZF_DEFAULT_OPTS="--color=$FZF_COLORS"
+
 # nnn file manager: `n` opens it and cds the shell to where you quit (q)
 [ -f /usr/share/nnn/quitcd/quitcd.bash_sh_zsh ] && . /usr/share/nnn/quitcd/quitcd.bash_sh_zsh
 # Show hidden files and folders by default (`.` toggles them in nnn)

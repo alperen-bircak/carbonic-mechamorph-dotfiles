@@ -1,9 +1,10 @@
 // rofi config; see `rofi -dump-config` for all options
 
+// The icon theme, from the active theme
+@import "~/.config/theme/rofi-config.rasi"
+
 configuration {
-    // App icons: Pixelitos, then apps' own icons from hicolor
     show-icons: true;
-    icon-theme: "pixelitos-dark";
 
     // Prompt text for each mode
     display-drun: "Apps";

@@ -22,3 +22,11 @@ mako:
 swaynag:
   filename: themes/swaynag/{{ scheme-system }}-{{ scheme-slug }}.conf
   supported-systems: [base24]
+
+rofi-config:
+  filename: themes/rofi-config/{{ scheme-system }}-{{ scheme-slug }}.rasi
+  supported-systems: [base24]
+
+shell:
+  filename: themes/shell/{{ scheme-system }}-{{ scheme-slug }}.sh
+  supported-systems: [base24]

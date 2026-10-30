@@ -5,9 +5,10 @@ packages := "sway bash bin ghostty kitty foot gtk mako gtklock rofi waybar bluet
 default:
     @just --list
 
-# Symlink all packages into ~
+# Symlink all packages into ~, and start on Ayu Carbon if no theme is active yet
 link:
     stow -v -t ~ {{packages}}
+    [ -e ~/.config/theme ] || ln -s themes/ayu-carbon ~/.config/theme
 
 # Remove the symlinks from ~
 unlink:
@@ -23,23 +24,18 @@ reload:
 
 # Apply GTK and Blueman settings (kept in dconf, so they can't be symlinked)
 gtk:
-    # color-scheme is what GTK4, libadwaita, browsers and Electron read through
-    # xdg-desktop-portal; GTK3 ignores it and needs gtk-theme
-    gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
-    gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'
     gsettings set org.gnome.desktop.interface font-name 'Fira Code 10'
     gsettings set org.gnome.desktop.interface document-font-name 'Fira Code 10'
     gsettings set org.gnome.desktop.interface monospace-font-name 'FiraCode Nerd Font Mono 10'
-    gsettings set org.gnome.desktop.interface icon-theme 'pixelitos-dark'
-    gsettings set org.gnome.desktop.interface cursor-theme 'Bibata-Original-Classic'
-    gsettings set org.gnome.desktop.interface cursor-size 28
     # No Blueman tray icon (waybar's bluetooth module opens blueman-manager);
     # ShowConnected needs StatusIcon, so it goes too
     gsettings set org.blueman.general plugin-list "['!StatusIcon', '!ShowConnected']"
+    # The colour scheme, GTK theme, icons and cursor come from the active theme
+    bin/.local/bin/theme-switch reapply
 
 # Only `just theme-generate` needs tinty. It isn't in pacman, so this takes the release binary.
 # The repo only holds the 16px icons; releases also have the 128px set.
-# Install the Pixelitos dark icon theme into ~/.local/share/icons
+# Install the Pixelitos dark and light icon themes into ~/.local/share/icons
 icons-install version="20261026" sha256="2ba74b1d3d9583650fda30939ff7e464fad7f983fca9c43eca08c817f8872ebb":
     #!/usr/bin/env bash
     set -euo pipefail
@@ -52,8 +48,11 @@ icons-install version="20261026" sha256="2ba74b1d3d9583650fda30939ff7e464fad7f98
     tar xzf "$name.tar.gz"
     icons=${XDG_DATA_HOME:-$HOME/.local/share}/icons
     mkdir -p "$icons"
-    rm -rf "$icons/pixelitos-dark"
-    cp -r "$name/pixelitos-dark" "$icons/"
+    variants=(pixelitos-dark pixelitos-light)
+    for variant in "${variants[@]}"; do
+        rm -rf "${icons:?}/${variant:?}"
+        cp -r "$name/$variant" "$icons/"
+    done
     # Names the theme lacks, and the icon of its own that stands in for each
     declare -A aliases=(
         [kitty]=apps/utilities-terminal
@@ -72,28 +71,36 @@ icons-install version="20261026" sha256="2ba74b1d3d9583650fda30939ff7e464fad7f98
         [changes-allow-symbolic]=emblems/emblem-unlocked
         [preferences-system-symbolic]=apps/preferences-system
     )
-    for name in "${!aliases[@]}"; do
-        for size in 16 128; do
-            ln -s "../${aliases[$name]}.png" "$icons/pixelitos-dark/$size/symbolic/$name.png"
+    for variant in "${variants[@]}"; do
+        for name in "${!aliases[@]}"; do
+            for size in 16 128; do
+                link=$icons/$variant/$size/symbolic/$name.png
+                [ -e "$link" ] || ln -s "../${aliases[$name]}.png" "$link"
+            done
         done
+        gtk-update-icon-cache -fq "$icons/$variant"
     done
-    gtk-update-icon-cache -fq "$icons/pixelitos-dark"
 
-# Install the Bibata Original Classic cursor theme into ~/.local/share/icons
-cursor-install version="2.0.7" sha256="158b2e7e1b7f6d0eec1af80a93172960dd083b652fef7589575ee984673cc468":
+# Install the Bibata Original Classic and Ice cursor themes into ~/.local/share/icons
+cursor-install version="2.0.7":
     #!/usr/bin/env bash
     set -euo pipefail
     tmp=$(mktemp -d)
     trap 'rm -rf "$tmp"' EXIT
     cd "$tmp"
-    name=Bibata-Original-Classic
-    curl -fsSLO "https://github.com/ful1e5/Bibata_Cursor/releases/download/v{{version}}/$name.tar.xz"
-    echo "{{sha256}}  $name.tar.xz" | sha256sum -c
-    tar xJf "$name.tar.xz"
+    declare -A sha256=(
+        [Bibata-Original-Classic]=158b2e7e1b7f6d0eec1af80a93172960dd083b652fef7589575ee984673cc468
+        [Bibata-Original-Ice]=c96ec7515179cadcefa30f7aefd449830e4e0ab878ee13afbc96aa5906692916
+    )
     icons=${XDG_DATA_HOME:-$HOME/.local/share}/icons
     mkdir -p "$icons"
-    rm -rf "$icons/$name"
-    cp -r "$name" "$icons/"
+    for name in "${!sha256[@]}"; do
+        curl -fsSLO "https://github.com/ful1e5/Bibata_Cursor/releases/download/v{{version}}/$name.tar.xz"
+        echo "${sha256[$name]}  $name.tar.xz" | sha256sum -c
+        tar xJf "$name.tar.xz"
+        rm -rf "${icons:?}/${name:?}"
+        cp -r "$name" "$icons/"
+    done
 
 # Install tinty and fetch its schemes and templates (after `just link`)
 tinty-install version="0.35.0":
@@ -128,8 +135,8 @@ _tinty-templates:
     cp -rL tinty/.config/tinted-theming/tinty/dotfiles-templates "$data/dotfiles-templates"
 
 # `tinty install` links any new [[items]] without touching the network.
-# Render the scheme into theme/.config/theme, for one app or all, e.g. `just theme-generate waybar`
-theme-generate app="all": _tinty-templates
+# Render a scheme into theme/.config/themes, e.g. `just theme-generate waybar ayu-light-v9`
+theme-generate app="all" theme="ayu-carbon": _tinty-templates
     #!/usr/bin/env bash
     set -euo pipefail
     # Each app's file in the repo, and the tinty output it starts from
@@ -140,6 +147,8 @@ theme-generate app="all": _tinty-templates
         [sway.conf]=dotfiles-sway-themes-sway-file.conf
         [swaynag.conf]=dotfiles-swaynag-themes-swaynag-file.conf
         [rofi.rasi]=dotfiles-rofi-themes-rofi-file.rasi
+        [rofi-config.rasi]=dotfiles-rofi-config-themes-rofi-config-file.rasi
+        [colors.sh]=dotfiles-shell-themes-shell-file.sh
         [mako.conf]=dotfiles-mako-themes-mako-file.conf
         [waybar.css]=dotfiles-css-themes-css-file.css
         [swayosd.css]=dotfiles-css-themes-css-file.css
@@ -147,7 +156,9 @@ theme-generate app="all": _tinty-templates
         [gtk3.css]=dotfiles-css-themes-css-file.css
         [gtk4.css]=dotfiles-css-themes-css-file.css
     )
-    dir=theme/.config/theme
+    # The lock screen always uses Ayu Carbon
+    [ "{{theme}}" = ayu-carbon ] || unset 'sources[gtklock.css]'
+    dir=theme/.config/themes/{{theme}}
     files=()
     for file in "${!sources[@]}"; do
         [ "{{app}}" = all ] || [ "{{app}}" = "${file%.*}" ] && files+=("$file")
@@ -157,7 +168,7 @@ theme-generate app="all": _tinty-templates
         exit 1
     fi
     tinty install -q
-    tinty apply base24-ayu-carbon
+    tinty apply base24-{{theme}}
     data=${XDG_DATA_HOME:-$HOME/.local/share}/tinted-theming/tinty
     mkdir -p "$dir"
     for file in "${files[@]}"; do
@@ -165,25 +176,16 @@ theme-generate app="all": _tinty-templates
         echo "generated $dir/$file"
     done
 
-# Configs read theme/.config/theme through symlinks, so there's nothing to copy.
-# Reload running apps after a theme change; GTK apps, Neovim and foot need a restart
+# Configs read ~/.config/theme, a symlink to the active theme, so there's nothing to copy.
+# Reload running apps after editing a theme; GTK4 apps and foot need a restart
 theme-sync:
-    #!/usr/bin/env bash
-    stow -R -t ~ theme
-    # Also restarts waybar; don't signal it here, it isn't ready for USR2 yet
-    swaymsg -q reload
-    makoctl reload
-    pkill -USR1 -x kitty
-    pkill -USR2 -x ghostty
-    # swayosd only reads its style at startup
-    pkill -x swayosd-server && swaymsg -q exec swayosd-server
-    true
+    @bin/.local/bin/theme-switch reapply
 
 # Open the hex background maker (helpers/bg-maker)
 bg-maker:
     just -f helpers/bg-maker/justfile app
 
-# Set the lock, login and Plymouth background, e.g. `just update-background ~/bg.png`
+# Set a background, e.g. `just update-background ~/bg.png` or `just update-background --light ~/bg.png`
 [positional-arguments]
 update-background *args:
     @bin/.local/bin/update-background "$@"

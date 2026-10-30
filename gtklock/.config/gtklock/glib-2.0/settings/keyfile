@@ -1,0 +1,6 @@
+# The desktop's GTK settings for the lock screen (see bin/.local/bin/lock)
+[org/gnome/desktop/interface]
+font-name='Fira Code 10'
+icon-theme='pixelitos-dark'
+cursor-theme='Bibata-Original-Classic'
+cursor-size=28

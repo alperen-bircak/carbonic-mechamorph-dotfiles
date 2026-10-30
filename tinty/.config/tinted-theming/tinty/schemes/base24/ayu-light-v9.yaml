@@ -1,0 +1,39 @@
+# The light theme, separate from Ayu Carbon. After editing, run
+# `just theme-generate all ayu-light-v9`, then `just theme-sync`.
+#
+# Plain ayu light, from the ayu palette v9.1.0 (`just ayu light <token>`) and the roles
+# in THEME_MANIFEST.md. Tinty's own ayu-light scheme is an older palette, hence the -v9.
+system: "base24"
+name: "Ayu Light v9"
+author: "Ayu Theme (https://github.com/ayu-theme)"
+variant: "light"
+palette:
+  # Backgrounds and grays, lightest to darkest
+  base00: "#fcfcfc" # editor.bg: main background
+  base01: "#fafafa" # ui.panel.bg: raised background
+  base02: "#e7eaed" # ui.line (#6b7d8f1f) flattened onto ui.bg: thin borders, selected items
+  base03: "#828e9f" # ui.fg: muted text
+  base04: "#6f7782" # halfway between ui.fg and editor.fg; ayu has no token here
+  base05: "#5c6166" # editor.fg: main text
+  base06: "#2e3033" # halfway between editor.fg and black; ayu has no token here
+  base07: "#000000" # black, the end of the ramp, as Ayu Carbon ends in white
+
+  # Accents
+  base08: "#f07171" # terminal.red
+  base09: "#fa8532" # syntax.keyword: ayu's orange
+  base0A: "#eba400" # terminal.yellow
+  base0B: "#86b300" # terminal.green
+  base0C: "#4cbf99" # terminal.cyan
+  base0D: "#4ca3c1" # palette.indigo.l2: the accent, in place of terminal.blue
+  base0E: "#a37acc" # terminal.magenta
+  base0F: "#e65050" # common.error
+
+  # Base24 extras
+  base10: "#f8f9fa" # ui.bg: outer areas (bars)
+  base11: "#ebeef0" # surface.sunk
+  base12: "#f07171" # terminal.brightRed
+  base13: "#eba400" # terminal.brightYellow
+  base14: "#86b300" # terminal.brightGreen
+  base15: "#4cbf99" # terminal.brightCyan
+  base16: "#22a4e6" # terminal.brightBlue
+  base17: "#a37acc" # terminal.brightMagenta

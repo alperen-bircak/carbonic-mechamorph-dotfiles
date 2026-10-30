@@ -1,0 +1,9 @@
+#!/bin/sh
+# Usage: lock
+# Lock the screen with gtklock, always in Ayu Carbon. GTK reads gtk.css from XDG_CONFIG_HOME, and
+# with this backend its settings too, so pointing that at gtklock's folder keeps the active
+# theme out. The style and layout are given here, not in config.ini, which takes no $HOME. The
+# layout is gtklock's default, changed so Enter does nothing while the password box is empty.
+exec env GTK_THEME=Adwaita:dark GSETTINGS_BACKEND=keyfile XDG_CONFIG_HOME="$HOME/.config/gtklock" \
+    gtklock -c "$HOME/.config/gtklock/config.ini" -s "$HOME/.config/gtklock/style.css" \
+        -x "$HOME/.config/gtklock/layout.ui" -d

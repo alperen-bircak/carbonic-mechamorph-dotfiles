@@ -1,6 +1,6 @@
-/* Ayu Carbon for GTK4 apps: libadwaita (Loupe, Showtime) reads the --variables,
+/* The active theme for GTK4 apps: libadwaita (Loupe, Showtime) reads the --variables,
    plain GTK4 (pavucontrol) needs the widget rules further down. @base00 and so
-   on are in theme/.config/theme/gtk4.css. */
+   on are in ~/.config/theme/gtk4.css. Apps read this at startup. */
 @import url("../theme/gtk4.css");
 
 :root {

@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-# Usage: update-background [image.png | --file-picker]  -- set the gtklock, nwg-hello
-# and Plymouth background; with no image, reinstall the one in system/
-# All three read the same file, see system/README.md. sway does too, so the
-# desktop changes at the next sway reload.
+# Usage: update-background [--dark | --light] [image.png | --file-picker]
+# --dark (the default) sets the gtklock, nwg-hello and Plymouth background; with no image,
+# it reinstalls the one in system/. All three read the same file, see system/README.md.
+# Ayu Carbon's desktop does too, so it changes at the next sway reload.
+# --light sets Ayu Light's desktop wallpaper, which needs an image and no password.
+# --file-picker with neither flag asks in rofi which one to set.
 set -euo pipefail
 
 # Started from the Super Menu, PATH is sway's, without run0k
@@ -12,6 +14,13 @@ trap 'notify-send -i dialog-error-symbolic "Background not updated" "update-back
 
 copy="$HOME/dotfiles/system/usr/local/share/backgrounds/hex.png"
 live=/usr/local/share/backgrounds/hex.png
+light="$HOME/dotfiles/theme/.config/themes/ayu-light-v9/wallpaper.png"
+
+case ${1:-} in
+    --dark)  variant=dark; shift ;;
+    --light) variant=light; shift ;;
+    *)       variant= ;;
+esac
 
 # Print the file chosen in the desktop portal's dialog, the one browsers use.
 # Python because the portal only answers the D-Bus connection that asked, so one
@@ -67,8 +76,15 @@ EOF
 }
 
 if [ "${1:-}" = --file-picker ]; then
+    if [ -z "$variant" ]; then
+        variant=$(printf 'Dark\nLight\n' | rofi -dmenu -i -no-custom -p Background) || exit 0
+        variant=${variant,,}
+    fi
     image=$(pick_image)
     [ -n "$image" ] || exit 0   # Cancel
+elif [ "$variant" = light ] && [ -z "${1:-}" ]; then
+    echo "update-background: --light needs an image" >&2
+    exit 1
 else
     image=${1:-$copy}
 fi
@@ -77,6 +93,15 @@ fi
 if [ "$(file -b --mime-type -- "$image")" != image/png ]; then
     echo "update-background: $image isn't a PNG" >&2
     exit 1
+fi
+
+if [ "$variant" = light ]; then
+    [ "$image" -ef "$light" ] || cp -- "$image" "$light"
+    if [ "$(readlink "$HOME/.config/theme")" = themes/ayu-light-v9 ]; then
+        swaymsg -q reload
+    fi
+    notify-send -i preferences-desktop-wallpaper-symbolic "Light background updated"
+    exit
 fi
 
 [ "$image" -ef "$copy" ] || cp -- "$image" "$copy"

@@ -11,8 +11,10 @@
 apps="thunar firefox kitty"
 double_tap_ms=400
 
+bin=$HOME/.local/bin
+
 # Power submenu: "Name|icon|command", in menu order
-power="Lock|lock|gtklock -d
+power="Lock|lock|$bin/lock
 Suspend|system-suspend|systemctl suspend
 Log out|system-log-out|swaymsg exit
 Reboot|system-reboot|systemctl reboot
@@ -21,7 +23,6 @@ Shut down|system-shutdown|systemctl poweroff"
 # Settings submenu: "Name|icon|command", in menu order
 # Background runs in plain kitty, not ephemeral-tui: tui-autoclose would kill it when the file
 # picker takes focus, and run0k needs a terminal to ask for the password only once.
-bin=$HOME/.local/bin
 settings="Bluetooth|bluetooth-active-symbolic|$bin/ephemeral-tui bluetui
 Sound|audio-volume-high-symbolic|$bin/ephemeral-tui wiremix
 Wi-Fi|network-wireless-symbolic|$bin/ephemeral-tui wlctl
@@ -29,6 +30,7 @@ Brightness & Night Light|display-brightness-symbolic|$bin/ephemeral-tui -s 72x7 
 Keyboard layout|input-keyboard-symbolic|$bin/ephemeral-tui -s 60x7 keyboard $bin/keyboard-tui
 Battery|battery-symbolic|$bin/ephemeral-tui battop
 Disks|drive-harddisk-symbolic|$bin/ephemeral-tui -s 72x14 disks $bin/disks-tui
+Light or dark theme|preferences-desktop-theme|$bin/theme-switch toggle
 Background|preferences-desktop-wallpaper-symbolic|kitty $bin/update-background --file-picker
 Unlock password|changes-allow-symbolic|$bin/unlock-password"
 

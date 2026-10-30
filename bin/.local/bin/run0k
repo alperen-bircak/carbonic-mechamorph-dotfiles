@@ -38,8 +38,9 @@ entry { placeholder: "Password"; }'
         printf '%s\n' "$pw" |
             sudo -S -k -p '' sh -c 'mkdir -p /run/run0-grace && touch "/run/run0-grace/$1"' \
                 run0k "$id" 2>/dev/null && break
+        . "$HOME/.config/theme/colors.sh"
         error="
-<span color='#f07178'>Wrong password (3 wrong in a row locks it for 10 minutes)</span>"
+<span color='$error'>Wrong password (3 wrong in a row locks it for 10 minutes)</span>"
     done
     unset pw
 fi
