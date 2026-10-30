@@ -64,7 +64,8 @@ button:hover {
 #backlight,
 #language,
 #battery,
-#clock {
+#clock,
+#custom-power {
     /* 2px on top nudges the 13px text down 1px; on its own it sits high */
     padding: 2px 10px 0;
     background-color: @base01;
@@ -104,6 +105,13 @@ button:hover {
 }
 
 /* half width */
-#language {
+#language,
+#custom-power {
     min-width: 15px;
+}
+
+/* larger icon, already centered like the clock */
+#custom-power {
+    font-size: 17px;
+    padding-top: 0;
 }

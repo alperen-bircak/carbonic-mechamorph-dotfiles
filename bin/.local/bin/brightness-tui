@@ -18,8 +18,12 @@ bar_row=1                   # 0-based screen rows
 night_row=3
 temp_file=${XDG_STATE_HOME:-$HOME/.local/state}/nightlight-temp
 
-cleanup() { printf '\e[?1002l\e[?1006l'; tput cnorm; clear; }
+tty_state=$(stty -g)
+cleanup() { printf '\e[?1002l\e[?1006l'; tput cnorm; clear; stty "$tty_state"; }
 trap cleanup EXIT
+# for the whole run, not just during read: input arriving between reads would be echoed,
+# and mouse reports are long enough to wrap the last line and scroll the screen
+stty -echo -icanon
 tput civis
 printf '\e[?1002h\e[?1006h'   # report clicks, drags and scrolling (SGR format)
 clear

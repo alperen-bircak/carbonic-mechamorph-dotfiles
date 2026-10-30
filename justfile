@@ -31,6 +31,8 @@ gtk:
     gsettings set org.gnome.desktop.interface document-font-name 'Fira Code 10'
     gsettings set org.gnome.desktop.interface monospace-font-name 'FiraCode Nerd Font Mono 10'
     gsettings set org.gnome.desktop.interface icon-theme 'pixelitos-dark'
+    gsettings set org.gnome.desktop.interface cursor-theme 'Bibata-Original-Classic'
+    gsettings set org.gnome.desktop.interface cursor-size 28
     # No Blueman tray icon (waybar's bluetooth module opens blueman-manager);
     # ShowConnected needs StatusIcon, so it goes too
     gsettings set org.blueman.general plugin-list "['!StatusIcon', '!ShowConnected']"
@@ -76,6 +78,22 @@ icons-install version="20261026" sha256="2ba74b1d3d9583650fda30939ff7e464fad7f98
         done
     done
     gtk-update-icon-cache -fq "$icons/pixelitos-dark"
+
+# Install the Bibata Original Classic cursor theme into ~/.local/share/icons
+cursor-install version="2.0.7" sha256="158b2e7e1b7f6d0eec1af80a93172960dd083b652fef7589575ee984673cc468":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    tmp=$(mktemp -d)
+    trap 'rm -rf "$tmp"' EXIT
+    cd "$tmp"
+    name=Bibata-Original-Classic
+    curl -fsSLO "https://github.com/ful1e5/Bibata_Cursor/releases/download/v{{version}}/$name.tar.xz"
+    echo "{{sha256}}  $name.tar.xz" | sha256sum -c
+    tar xJf "$name.tar.xz"
+    icons=${XDG_DATA_HOME:-$HOME/.local/share}/icons
+    mkdir -p "$icons"
+    rm -rf "$icons/$name"
+    cp -r "$name" "$icons/"
 
 # Install tinty and fetch its schemes and templates (after `just link`)
 tinty-install version="0.35.0":
@@ -152,11 +170,11 @@ theme-generate app="all": _tinty-templates
 theme-sync:
     #!/usr/bin/env bash
     stow -R -t ~ theme
+    # Also restarts waybar; don't signal it here, it isn't ready for USR2 yet
     swaymsg -q reload
     makoctl reload
     pkill -USR1 -x kitty
     pkill -USR2 -x ghostty
-    pkill -USR2 -x waybar
     # swayosd only reads its style at startup
     pkill -x swayosd-server && swaymsg -q exec swayosd-server
     true

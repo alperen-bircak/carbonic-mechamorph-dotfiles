@@ -25,6 +25,7 @@ Run `just` to list the commands. The main ones:
 - `just theme-generate`: render the colour scheme into `theme/`, for one app or all
 - `just theme-sync`: reload running apps after a theme change
 - `just icons-install`: install the Pixelitos icon theme (on a new machine; `just gtk` selects it)
+- `just cursor-install`: install the Bibata Original Classic cursor theme (on a new machine; the sway config and `just gtk` select it)
 - `just tinty-install`: install tinty and fetch its schemes and templates (only needed for `just theme-generate`, after `just link`)
 - `just update-background`: set the lock, login and Plymouth background (give it a PNG, or `--file-picker` to choose one)
 

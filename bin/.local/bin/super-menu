@@ -1,13 +1,22 @@
 #!/bin/sh
-# Usage: super-menu
+# Usage: super-menu [power]
 # Super Menu: a short rofi menu of favourite apps, opened by double-tapping Mod (Super) in sway.
+# "super-menu power" goes straight to the Power submenu, for waybar's power button.
 # Sway runs this on every tap: the first only notes the time, and a second within double_tap_ms
 # opens the menu. Running it while rofi is open closes rofi instead, so one tap closes the menu.
 # Apps are desktop ids (files in /usr/share/applications without .desktop), in menu order.
-# The last entry, Settings, opens a second menu with the TUIs that waybar's modules open
+# The first entry, Power, opens a submenu to lock, suspend, log out, reboot or shut down.
+# The last entry, Settings, opens a submenu with the TUIs that waybar's modules open
 # (same ephemeral-tui commands as the waybar clicks), plus a few one-shot commands.
 apps="thunar firefox kitty"
 double_tap_ms=400
+
+# Power submenu: "Name|icon|command", in menu order
+power="Lock|lock|gtklock -d
+Suspend|system-suspend|systemctl suspend
+Log out|system-log-out|swaymsg exit
+Reboot|system-reboot|systemctl reboot
+Shut down|system-shutdown|systemctl poweroff"
 
 # Settings submenu: "Name|icon|command", in menu order
 # Background runs in plain kitty, not ephemeral-tui: tui-autoclose would kill it when the file
@@ -16,7 +25,7 @@ bin=$HOME/.local/bin
 settings="Bluetooth|bluetooth-active-symbolic|$bin/ephemeral-tui bluetui
 Sound|audio-volume-high-symbolic|$bin/ephemeral-tui wiremix
 Wi-Fi|network-wireless-symbolic|$bin/ephemeral-tui wlctl
-Brightness & night light|display-brightness-symbolic|$bin/ephemeral-tui -s 72x7 brightness $bin/brightness-tui
+Brightness & Night Light|display-brightness-symbolic|$bin/ephemeral-tui -s 72x7 brightness $bin/brightness-tui
 Keyboard layout|input-keyboard-symbolic|$bin/ephemeral-tui -s 60x7 keyboard $bin/keyboard-tui
 Battery|battery-symbolic|$bin/ephemeral-tui battop
 Disks|drive-harddisk-symbolic|$bin/ephemeral-tui -s 72x14 disks $bin/disks-tui
@@ -25,17 +34,9 @@ Unlock password|changes-allow-symbolic|$bin/unlock-password"
 
 pkill -x rofi && exit
 
-stamp=$XDG_RUNTIME_DIR/super-menu-tap
-now=$(date +%s%3N)
-last=$(cat "$stamp" 2>/dev/null)
-if [ $((now - ${last:-0})) -gt "$double_tap_ms" ]; then
-    echo "$now" > "$stamp"
-    exit
-fi
-rm -f "$stamp"
-
 # One "Name\0icon\x1fIcon" line per app, the format rofi uses for icons in dmenu mode
 list() {
+    printf 'Power\0icon\037system-shutdown\n'
     for id in $apps; do
         f=/usr/share/applications/$id.desktop
         name=$(grep -m1 '^Name=' "$f" | cut -d= -f2-)
@@ -60,16 +61,34 @@ menu() {
         -kb-cancel 'Escape,Control+g,Control+bracketleft,h'
 }
 
+# Shows a "Name|icon|command" list under a title and runs the picked command
+submenu() {
+    i=$(printf '%s\n' "$2" | while IFS='|' read -r name icon _; do
+        printf '%s\0icon\037%s\n' "$name" "$icon"
+    done | menu "$1") || exit
+    cmd=$(printf '%s\n' "$2" | sed -n "$((i + 1))p" | cut -d'|' -f3)
+    # word splitting on purpose: "ephemeral-tui -s 72x7 brightness /path/to/brightness-tui" is five words
+    exec $cmd
+}
+
+[ "$1" = power ] && submenu Power "$power"
+
+stamp=$XDG_RUNTIME_DIR/super-menu-tap
+now=$(date +%s%3N)
+last=$(cat "$stamp" 2>/dev/null)
+if [ $((now - ${last:-0})) -gt "$double_tap_ms" ]; then
+    echo "$now" > "$stamp"
+    exit
+fi
+rm -f "$stamp"
+
 i=$(list | menu 'Super Menu') || exit
+[ "$i" -eq 0 ] && submenu Power "$power"
+i=$((i - 1))
 set -- $apps
 if [ "$i" -lt $# ]; then
     shift "$i"
     exec gtk-launch "$1"
 fi
 
-i=$(printf '%s\n' "$settings" | while IFS='|' read -r name icon _; do
-    printf '%s\0icon\037%s\n' "$name" "$icon"
-done | menu 'Settings') || exit
-cmd=$(printf '%s\n' "$settings" | sed -n "$((i + 1))p" | cut -d'|' -f3)
-# word splitting on purpose: "ephemeral-tui -s 72x7 brightness /path/to/brightness-tui" is five words
-exec $cmd
+submenu Settings "$settings"

@@ -19,7 +19,8 @@
         "backlight",
         "battery",
         "sway/language",
-        "clock"
+        "clock",
+        "custom/power"
     ],
 
     // Left
@@ -121,5 +122,11 @@
         "format": "{:%d.%m.%Y %H:%M}",
         "locale": "tr_TR.UTF-8",
         "tooltip-format": "<tt><small>{calendar}</small></tt>"
+    },
+    "custom/power": {
+        "on-click": "~/.local/bin/super-menu power", // rofi menu, closes on a second click
+        "format": "󰐥",
+        "align": 0.5,
+        "tooltip": false
     }
 }
