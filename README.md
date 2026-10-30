@@ -9,8 +9,18 @@ Each top-level folder is a stow package laid out like `~`. For example, `sway/.c
 | `sway` | sway config |
 | `bash` | `.bashrc`, `.bash_profile`, `.profile` |
 | `bin` | scripts in `~/.local/bin` |
-| `gtklock` | lock screen config, style and layout |
+| `kitty` | kitty config, the main terminal |
+| `foot` | foot config, the backup terminal |
 | `gtk` | `gtk.css` for GTK3 and GTK4 apps |
+| `mako` | notification config |
+| `gtklock` | lock screen config, style and layout |
+| `rofi` | launcher config and theme |
+| `waybar` | status bar config and style |
+| `bluetui` | Bluetooth TUI config |
+| `wlctl` | Wi-Fi TUI config |
+| `wiremix` | sound TUI config |
+| `swayosd` | volume and brightness popup config and style |
+| `nvim` | Neovim config |
 | `theme` | each theme's files, in `~/.config/themes` |
 | `tinty` | [tinty](https://github.com/tinted-theming/tinty) config, the custom colour schemes and the templates that generate `theme` |
 | `system` | copies of root-owned files, not stowed (see `system/README.md`) |
