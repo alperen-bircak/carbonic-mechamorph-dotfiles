@@ -56,6 +56,21 @@ vim.api.nvim_create_autocmd('FileChangedShell', {
   end,
 })
 
+-- Tell kitty when Neovim is in the foreground, so kitty.conf can pass it <C-v>
+-- instead of pasting.
+vim.api.nvim_create_autocmd({ 'VimEnter', 'VimResume', 'UIEnter' }, {
+  group = group,
+  callback = function()
+    vim.api.nvim_ui_send('\027]1337;SetUserVar=in_editor=MQ==\007')
+  end,
+})
+vim.api.nvim_create_autocmd({ 'VimLeave', 'VimSuspend' }, {
+  group = group,
+  callback = function()
+    vim.api.nvim_ui_send('\027]1337;SetUserVar=in_editor\007')
+  end,
+})
+
 -- Compare the buffer with the file on disk side by side (Vim's DiffOrig).
 -- In the diff, do / dp pull or push a change; close the scratch side with :q.
 vim.api.nvim_create_user_command(
