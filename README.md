@@ -8,6 +8,8 @@ Each top-level folder is a stow package laid out like `~`. For example, `sway/.c
 |---|---|
 | `sway` | sway config |
 | `bash` | `.bashrc`, `.bash_profile`, `.profile` |
+| `zsh` | `.zshrc`, `.zprofile` |
+| `starship` | shell prompt config |
 | `bin` | scripts in `~/.local/bin` |
 | `kitty` | kitty config, the main terminal |
 | `foot` | foot config, the backup terminal |
