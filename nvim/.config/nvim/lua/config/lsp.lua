@@ -18,6 +18,7 @@ vim.lsp.enable({
   'yamlls', -- yaml-language-server
   'marksman', -- marksman (Markdown)
   'taplo', -- taplo-cli (TOML)
+  'roslyn_ls', -- roslyn-language-server (dotnet tool)
 })
 
 -- Diagnostics: message at the end of the line, plus a float when jumping

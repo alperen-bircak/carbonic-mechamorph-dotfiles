@@ -10,6 +10,7 @@ alias grep='grep --color=auto'
 alias fetch='fastfetch'
 PS1='[\u@\h \W]\$ '
 export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.dotnet/tools:$PATH"
 
 # fzf's colours follow the active theme
 . ~/.config/theme/theme.env
