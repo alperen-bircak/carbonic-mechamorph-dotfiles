@@ -87,7 +87,7 @@ These still break the rules above, because the app doesn't let them be changed f
 
 - Loupe paints the area around an image `#222226` itself, so CSS can't reach it. Its headerbar and buttons do follow the scheme.
 - Pixelitos doesn't cover every icon. Symbolic icons with no alias, like the arrows in GTK toolbars, still come from Adwaita, and some apps show their own icon from hicolor.
-- The login screen keeps Adwaita icons: the greeter user can't read `~/.local/share/icons`.
+- The login screen can't use the Pixelitos theme: the greeter user can't read `~/.local/share/icons`. Its three power buttons are Pixelitos anyway, from SVG copies in `system/usr/share/nwg-hello/`; everything else there stays Adwaita.
 - Qt apps use the Fusion style, which draws its own widgets, so they may keep slight rounding.
 - Pixelitos light has fewer icons than dark, and its `index.theme` inherits `breeze-dark`, which isn't installed. Icons it lacks fall back to hicolor.
 - Ayu Light's accent on white text is low contrast, and so is the white cursor on light backgrounds.
