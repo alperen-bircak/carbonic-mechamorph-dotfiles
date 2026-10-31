@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { createPortal } from "react-dom";
+import { createPortal, flushSync } from "react-dom";
 import { HexColorPicker } from "react-colorful";
 import { hexToHsl, hslToHex, isHex, isLight, normalizeHex, parseHex } from "../lib/color";
 
@@ -77,6 +77,12 @@ function PickerBody({ value, onChange, children, onRemove }: {
 
   const setHsl = (k: "h" | "s" | "l", v: number) => onChange(hslToHex({ ...hsl, [k]: v }));
 
+  const commitText = () => {
+    const hex = isHex(text) ? normalizeHex(text) : value;
+    setText(hex);
+    if (hex !== value) onChange(hex);
+  };
+
   return (
     <div className="picker" ref={root}>
       <HexColorPicker color={value} onChange={onChange} />
@@ -87,8 +93,10 @@ function PickerBody({ value, onChange, children, onRemove }: {
           spellCheck={false}
           onChange={(e) => {
             setText(e.target.value);
-            if (isHex(e.target.value)) onChange(normalizeHex(e.target.value));
+            // Six digits are final. Three could be the start of six, so they wait for commit
+            if (/^#?[0-9a-f]{6}$/i.test(e.target.value.trim())) onChange(normalizeHex(e.target.value));
           }}
+          onKeyDown={(e) => { if (e.key === "Enter") commitText(); }}
           onFocus={(e) => e.target.select()}
           onPaste={(e) => {
             // A pasted hex replaces the field instead of joining what's there
@@ -98,7 +106,7 @@ function PickerBody({ value, onChange, children, onRemove }: {
             setText(hex);
             onChange(hex);
           }}
-          onBlur={() => setText(value)}
+          onBlur={commitText}
         />
         {EyeDropper && (
           <button className="icon-btn" title="Pick a colour from the screen" onClick={async () => {
@@ -181,15 +189,21 @@ export function Popover({ anchor, onClose, children }: {
   useEffect(() => {
     const el = ref.current!;
     stack.push(el);
+    // Closing removes a focused field without a blur, so blur it first to keep what was typed
+    const dismiss = () => {
+      const focused = document.activeElement as HTMLElement | null;
+      if (focused && el.contains(focused)) flushSync(() => focused.blur());
+      close.current();
+    };
     // A click inside this popover or one opened on top of it keeps it open
     const down = (e: PointerEvent) => {
       const t = e.target as Node;
       if (anchor?.contains(t)) return;
       if (stack.slice(stack.indexOf(el)).some((p) => p.contains(t))) return;
-      close.current();
+      dismiss();
     };
     const key = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && stack[stack.length - 1] === el) close.current();
+      if (e.key === "Escape" && stack[stack.length - 1] === el) dismiss();
     };
     document.addEventListener("pointerdown", down);
     document.addEventListener("keydown", key);
