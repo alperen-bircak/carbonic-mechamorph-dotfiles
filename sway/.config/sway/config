@@ -185,9 +185,8 @@ exec systemd-inhibit --what=handle-power-key --who=sway --why='sway binds the po
     bindsym $mod+8 workspace number 8
     bindsym $mod+9 workspace number 9
     bindsym $mod+0 workspace number 10
-    # Cycle through workspaces
-    bindsym $mod+Tab workspace next
-    bindsym $mod+Shift+Tab workspace prev
+    # Jump back to the previous workspace
+    bindsym $mod+Tab workspace back_and_forth
     # Move focused container to workspace
     bindsym $mod+Shift+1 move container to workspace number 1
     bindsym $mod+Shift+2 move container to workspace number 2
