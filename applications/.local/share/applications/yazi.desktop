@@ -1,0 +1,14 @@
+[Desktop Entry]
+# Shadows /usr/share/applications/yazi.desktop. That one has Terminal=true, which GLib apps
+# (gtk-launch, Firefox, GTK file dialogs) can't open: GLib's terminal list doesn't include kitty.
+# So this one starts kitty itself. "yazi FILE" opens FILE's folder with FILE selected.
+Name=Yazi File Manager
+Icon=yazi
+Comment=Blazing fast terminal file manager written in Rust, based on async I/O
+TryExec=yazi
+Exec=kitty yazi %f
+Terminal=false
+Type=Application
+MimeType=inode/directory;
+Categories=System;FileManager;FileTools;
+Keywords=File;Manager;Explorer;Browser;Launcher;

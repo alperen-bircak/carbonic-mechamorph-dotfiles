@@ -1,0 +1,31 @@
+# calcurse config (opened by clicking waybar's clock, bin/.local/bin/calendar).
+# Only the settings that differ from calcurse's defaults. calcurse rewrites this file (through
+# the symlink) only when you change settings in its own config menu (C).
+
+# Colours: calcurse knows only the 8 terminal colours, which kitty takes from the active theme.
+# The theme colour marks the selected panel's border. Today's red and yellow are built in.
+appearance.theme=white on default
+# No titles on the panels, and no notify bar (the inverted strip at the bottom; waybar has the clock)
+appearance.compactpanels=yes
+appearance.notifybar=no
+
+# q quits (and saves) at once
+general.confirmquit=no
+# calcurse saves only on quit (ephemeral-tui presses q to close it), so also save every minute,
+# in case the window is killed instead
+general.periodicsave=1
+
+# Dates as 03.11.2026, like the clock; type them as dd/mm/yyyy
+format.inputdate=2
+format.outputdate=%d.%m.%Y
+format.notifydate=%a %d.%m.%Y
+format.notifytime=%H:%M
+format.dayheading=%A %d.%m.%Y
+
+# Reminders: a notification 5 minutes before every appointment, from the background daemon
+# (sway starts it; it also takes over whenever calcurse's window closes)
+daemon.enable=yes
+notification.notifyall=all
+notification.warning=300
+# "calcurse --next" prints "   [00:05] Dentist" (time left, then the appointment): shown as "Dentist, in 00:05"
+notification.command=notify-send -a calcurse "Coming up" "$(calcurse --next | tail -n +2 | sed -E 's/^ *\[([0-9:]+)\] (.*)/\2, in \1/')"

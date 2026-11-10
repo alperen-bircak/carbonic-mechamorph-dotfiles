@@ -1,15 +1,17 @@
 #!/bin/sh
-# Usage: super-menu [power|power-key]
+# Usage: super-menu [power|power-key|profile]
 # Super Menu: a short rofi menu of favourite apps, opened by double-tapping Mod (Super) in sway.
 # "super-menu power" goes straight to the Power submenu, for waybar's power button.
 # "super-menu power-key" does the same for the power key, but suspends if that submenu is open.
+# "super-menu profile" goes straight to the TLP power profile menu, for waybar's battery module.
 # Sway runs this on every tap: the first only notes the time, and a second within double_tap_ms
 # opens the menu. Running it while rofi is open closes rofi instead, so one tap closes the menu.
 # Apps are desktop ids (files in /usr/share/applications without .desktop), in menu order.
-# The first entry, Power, opens a submenu to lock, suspend, log out, reboot or shut down.
+# The first entry, Apps, opens the full app launcher (rofi drun, the same as Mod+d in sway).
+# The next entry, Power, opens a submenu to lock, suspend, log out, reboot or shut down.
 # The last entry, Settings, opens a submenu with the TUIs that waybar's modules open
 # (same ephemeral-tui commands as the waybar clicks), plus a few one-shot commands.
-apps="thunar firefox kitty"
+apps="yazi firefox kitty"
 double_tap_ms=400
 
 bin=$HOME/.local/bin
@@ -30,10 +32,18 @@ Wi-Fi|network-wireless-symbolic|$bin/ephemeral-tui wlctl
 Brightness & Night Light|display-brightness-symbolic|$bin/ephemeral-tui -s 72x7 brightness $bin/brightness-tui
 Keyboard layout|input-keyboard-symbolic|$bin/ephemeral-tui -s 60x7 keyboard $bin/keyboard-tui
 Battery|battery-symbolic|$bin/ephemeral-tui battop
+Power profile|preferences-system-power-management|$bin/super-menu profile
 Disks|drive-harddisk-symbolic|$bin/ephemeral-tui -s 72x14 disks $bin/disks-tui
 Light or dark theme|preferences-desktop-theme|$bin/theme-switch toggle
 Background|preferences-desktop-wallpaper-symbolic|kitty $bin/update-background --file-picker
 Unlock password|changes-allow-symbolic|$bin/unlock-password"
+
+# TLP profiles: "Name|icon|tlp command", in menu order. Picking one is a one-off "tlp <profile>":
+# TLP's automatic switching stays on. It's in smart mode, so a pick that differs from the current
+# power source's default survives the next plug or unplug; picking that default again ends this.
+profiles="Performance|battery-full|performance
+Balanced|battery-good|balanced
+Power saver|battery-low|power-saver"
 
 if [ "$1" = power-key ]; then
     pkill -f '^rofi .*<b>Power</b>' && exec systemctl suspend
@@ -44,6 +54,7 @@ pkill -x rofi && exit
 
 # One "Name\0icon\x1fIcon" line per app, the format rofi uses for icons in dmenu mode
 list() {
+    printf 'Apps\0icon\037view-app-grid-symbolic\n'
     printf 'Power\0icon\037system-shutdown\n'
     for id in $apps; do
         f=/usr/share/applications/$id.desktop
@@ -63,10 +74,12 @@ mainbox { children: [ message, listview ]; }
 message { background-color: transparent; padding: 6px 0 10px 0; }
 textbox { horizontal-align: 0.5; text-color: @fg; }'
 menu() {
-    rofi -dmenu -i -no-custom -format i -show-icons -markup -mesg "<b>$1</b>" -theme-str "$theme" \
+    title=$1
+    shift
+    rofi -dmenu -i -no-custom -format i -show-icons -markup -mesg "<b>$title</b>" -theme-str "$theme" \
         -kb-row-down 'Down,Control+n,j' -kb-row-up 'Up,Control+p,k' \
         -kb-accept-entry 'Control+j,Control+m,Return,KP_Enter,l' \
-        -kb-cancel 'Escape,Control+g,Control+bracketleft,h'
+        -kb-cancel 'Escape,Control+g,Control+bracketleft,h' "$@"
 }
 
 # Shows a "Name|icon|command" list under a title and runs the picked command
@@ -79,7 +92,28 @@ submenu() {
     exec $cmd
 }
 
+# Lists the TLP profiles with the current one marked and starting selected, and applies the pick.
+# "tlp-stat -s" needs no root; "tlp" does, so run0k asks for the password.
+profile_menu() {
+    current=$(tlp-stat -s | sed -n 's/^TLP profile *= *\([^/ ]*\).*/\1/p')
+    row=$(printf '%s\n' "$profiles" | cut -d'|' -f3 | grep -nx "$current" | cut -d: -f1)
+    i=$(printf '%s\n' "$profiles" | while IFS='|' read -r name icon mode; do
+        [ "$mode" = "$current" ] && name="$name (current)"
+        printf '%s\0icon\037%s\n' "$name" "$icon"
+    done | menu 'Power profile' ${row:+-a $((row - 1)) -selected-row $((row - 1))}) || exit
+    IFS='|' read -r name icon mode <<EOF
+$(printf '%s\n' "$profiles" | sed -n "$((i + 1))p")
+EOF
+    if "$bin/run0k" tlp "$mode" >/dev/null 2>&1; then
+        notify-send -i "$icon" "Power profile" "$name"
+    else
+        notify-send -i dialog-error-symbolic "Couldn't change power profile" "tlp $mode failed or was cancelled"
+    fi
+    exit
+}
+
 [ "$1" = power ] && submenu Power "$power"
+[ "$1" = profile ] && profile_menu
 
 stamp=$XDG_RUNTIME_DIR/super-menu-tap
 now=$(date +%s%3N)
@@ -91,8 +125,9 @@ fi
 rm -f "$stamp"
 
 i=$(list | menu 'Super Menu') || exit
-[ "$i" -eq 0 ] && submenu Power "$power"
-i=$((i - 1))
+[ "$i" -eq 0 ] && exec rofi -show drun
+[ "$i" -eq 1 ] && submenu Power "$power"
+i=$((i - 2))
 set -- $apps
 if [ "$i" -lt $# ]; then
     shift "$i"

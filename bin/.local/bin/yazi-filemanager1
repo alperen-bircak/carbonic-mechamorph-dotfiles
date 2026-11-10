@@ -1,0 +1,63 @@
+#!/usr/bin/env python3
+# org.freedesktop.FileManager1 for yazi: what apps call to "Show in folder" (Firefox's downloads,
+# Chromium, Electron apps...). Thunar provides this too, so D-Bus starts this one instead through
+# ~/.local/share/dbus-1/services/org.freedesktop.FileManager1.service (user services win).
+# ShowItems opens each item's folder with the item selected; ShowFolders opens the folders.
+# Exits after 10 seconds without calls; D-Bus starts it again on the next one.
+import subprocess
+
+import gi
+
+gi.require_version("Gio", "2.0")
+from gi.repository import Gio, GLib
+
+XML = """
+<node>
+  <interface name="org.freedesktop.FileManager1">
+    <method name="ShowFolders">
+      <arg type="as" name="URIs" direction="in"/>
+      <arg type="s" name="StartupId" direction="in"/>
+    </method>
+    <method name="ShowItems">
+      <arg type="as" name="URIs" direction="in"/>
+      <arg type="s" name="StartupId" direction="in"/>
+    </method>
+    <method name="ShowItemProperties">
+      <arg type="as" name="URIs" direction="in"/>
+      <arg type="s" name="StartupId" direction="in"/>
+    </method>
+  </interface>
+</node>
+"""
+
+loop = GLib.MainLoop()
+timer = 0
+
+
+def idle_quit():
+    global timer
+    if timer:
+        GLib.source_remove(timer)
+    timer = GLib.timeout_add_seconds(10, loop.quit)
+
+
+def on_call(conn, sender, path, iface, method, params, invocation):
+    uris, _startup_id = params.unpack()
+    for uri in uris:
+        path = Gio.File.new_for_uri(uri).get_path()
+        if path:
+            # yazi on a folder opens it; on a file, opens its folder with the file selected
+            subprocess.Popen(["kitty", "yazi", path], start_new_session=True)
+    invocation.return_value(None)
+    idle_quit()
+
+
+def on_bus(conn, name):
+    node = Gio.DBusNodeInfo.new_for_xml(XML)
+    conn.register_object("/org/freedesktop/FileManager1", node.interfaces[0], on_call)
+
+
+Gio.bus_own_name(Gio.BusType.SESSION, "org.freedesktop.FileManager1",
+                 Gio.BusNameOwnerFlags.NONE, on_bus, None, lambda *_: loop.quit())
+idle_quit()
+loop.run()

@@ -1,0 +1,20 @@
+#!/bin/sh
+# Ctrl+Alt+Delete: open btop fullscreen on its own "btop" workspace, or jump to it if it's
+# already open. Quitting btop returns to the previous workspace. Sway keeps the window on
+# that workspace and fullscreen (for_window rule on the app_id).
+app_id=btop-workspace
+
+# Held for as long as btop runs, so a second press can't start another one
+exec 9>"${XDG_RUNTIME_DIR:-/tmp}/btop-workspace.lock"
+if ! flock -n 9; then
+    swaymsg -q "[app_id=\"^$app_id\$\"] focus"
+    exit 0
+fi
+
+swaymsg -q workspace btop
+# No "process still running" prompt when the window is closed
+kitty --class="$app_id" -o confirm_os_window_close=0 btop 9>&-
+
+# Only go back if still looking at the now empty workspace
+focused=$(swaymsg -t get_workspaces | jq -r '.[] | select(.focused).name')
+[ "$focused" = btop ] && swaymsg -q workspace back_and_forth

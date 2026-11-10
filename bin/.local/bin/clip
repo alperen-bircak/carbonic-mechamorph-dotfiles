@@ -3,8 +3,13 @@
 # Usage: clip          pick and copy
 #        clip delete   pick and remove an entry from history
 #        clip wipe     clear the whole history
+# clip-menu (Alt+v in sway) is the rofi version, for outside a terminal.
+# Escape cancels without touching the clipboard: wl-copy only runs after a pick.
+# wl-copy stays in the background to serve the clipboard; its output goes to /dev/null so it
+# doesn't hold the terminal open, which would keep that window from closing.
 case "$1" in
     delete) cliphist list | fzf --no-sort --prompt='delete> ' | cliphist delete ;;
     wipe)   cliphist wipe && echo "Clipboard history cleared" ;;
-    *)      cliphist list | fzf --no-sort --prompt='clip> ' | cliphist decode | wl-copy ;;
+    *)      pick=$(cliphist list | fzf --no-sort --prompt='clip> ') || exit 0
+            printf '%s\n' "$pick" | cliphist decode | wl-copy >/dev/null 2>&1 ;;
 esac

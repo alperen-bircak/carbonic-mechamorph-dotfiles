@@ -69,3 +69,9 @@ name = "dotfiles-shell"
 path = "~/.local/share/tinted-theming/tinty/dotfiles-templates"
 themes-dir = "themes/shell"
 supported-systems = ["base24"]
+
+[[items]]
+name = "dotfiles-waybar-calendar"
+path = "~/.local/share/tinted-theming/tinty/dotfiles-templates"
+themes-dir = "themes/waybar-calendar"
+supported-systems = ["base24"]

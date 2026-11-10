@@ -1,22 +1,24 @@
-# Stow packages that get symlinked into ~
-packages := "sway bash zsh starship bin kitty foot gtk mako gtklock rofi waybar bluetui wlctl wiremix swayosd nvim tinty theme"
+# Stow packages that get symlinked into ~. A missing one is skipped: ssh is in .gitignore, so it
+# exists only on this machine.
+packages := "sway bash zsh starship bin kitty foot gtk mako gtklock rofi waybar bluetui wlctl wiremix swayosd nvim tinty theme applications calcurse yazi fastfetch portal arch-update ssh"
 
 # List recipes
 default:
     @just --list
 
-# Symlink all packages into ~, and start on Ayu Carbon if no theme is active yet
+# Symlink all packages into ~, start on Ayu Carbon if no theme is active yet, and link ~/media to the USB mounts
 link:
-    stow -v -t ~ {{packages}}
+    stow -v -t ~ $(ls -d {{packages}} 2>/dev/null)
     [ -e ~/.config/theme ] || ln -s themes/ayu-carbon ~/.config/theme
+    [ -e ~/media ] || [ -L ~/media ] || ln -s /run/media/$USER ~/media
 
 # Remove the symlinks from ~
 unlink:
-    stow -v -D -t ~ {{packages}}
+    stow -v -D -t ~ $(ls -d {{packages}} 2>/dev/null)
 
 # Re-link after adding or removing files in a package
 relink:
-    stow -v -R -t ~ {{packages}}
+    stow -v -R -t ~ $(ls -d {{packages}} 2>/dev/null)
 
 # Reload the sway config
 reload:
@@ -150,6 +152,7 @@ theme-generate app="all" theme="ayu-carbon": _tinty-templates
         [colors.sh]=dotfiles-shell-themes-shell-file.sh
         [mako.conf]=dotfiles-mako-themes-mako-file.conf
         [waybar.css]=dotfiles-css-themes-css-file.css
+        [waybar-calendar.jsonc]=dotfiles-waybar-calendar-themes-waybar-calendar-file.jsonc
         [swayosd.css]=dotfiles-css-themes-css-file.css
         [gtklock.css]=dotfiles-css-themes-css-file.css
         [gtk3.css]=dotfiles-css-themes-css-file.css

@@ -23,6 +23,13 @@ Each top-level folder is a stow package laid out like `~`. For example, `sway/.c
 | `wiremix` | sound TUI config |
 | `swayosd` | volume and brightness popup config and style |
 | `nvim` | Neovim config |
+| `calcurse` | calendar TUI config, opened by clicking waybar's clock |
+| `fastfetch` | system info (`fetch`) |
+| `yazi` | yazi file manager config (`y` in zsh opens it). yazi is the default file manager: `mimeapps.list` opens folders with it, and "Show in folder" goes to `bin/.local/bin/yazi-filemanager1` |
+| `applications` | desktop entries and icons in `~/.local/share` (incl. `yazi.desktop`, which opens yazi in kitty), and the D-Bus service that starts `yazi-filemanager1` |
+| `portal` | xdg-desktop-portal config: open and save dialogs are yazi in a floating kitty (xdg-desktop-portal-termfilechooser, AUR). `bash/.profile` sets `GTK_USE_PORTAL` and `GDK_DEBUG=portals` so native GTK apps and Firefox use it |
+| `arch-update` | [Arch-Update](https://github.com/Antiz96/arch-update) config (AUR): update reminders for pacman, AUR and Flatpak, a tray icon that shows when updates are waiting. sway starts it and its check timer |
+| `ssh` | `~/.ssh/config` only, kept on this machine: `ssh/` is in `.gitignore`, and the justfile skips packages that aren't there |
 | `theme` | each theme's files, in `~/.config/themes` |
 | `tinty` | [tinty](https://github.com/tinted-theming/tinty) config, the custom colour schemes and the templates that generate `theme` |
 | `system` | copies of root-owned files, not stowed (see `system/README.md`) |

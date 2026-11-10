@@ -1,0 +1,18 @@
+#!/bin/sh
+# Usage: close-others workspace|all  -- close every window except the focused
+# one, on the focused workspace or on every workspace (scratchpad left alone)
+case $1 in
+    workspace|all) ;;
+    *) echo "usage: close-others workspace|all" >&2; exit 2 ;;
+esac
+
+cmds=$(swaymsg -t get_tree | jq -r --arg mode "$1" '
+    def wins: .. | objects | select(.shell?) | .id;
+    [.. | objects | select(.focused? == true and .type != "workspace") | wins] as $keep
+    | if $keep == [] then empty else
+        [.. | objects | select(.type == "workspace" and .name != "__i3_scratch")]
+        | if $mode == "workspace" then map(select([.. | objects | .focused?] | any)) end
+        | [.[] | wins | select(. as $id | $keep | index($id) | not)]
+        | map("[con_id=\(.)] kill") | join("; ")
+      end')
+[ -z "$cmds" ] || swaymsg -q "$cmds"

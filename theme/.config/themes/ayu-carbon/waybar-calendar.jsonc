@@ -1,0 +1,15 @@
+// Ayu Carbon: colours for the calendar in waybar's clock tooltip. waybar's config
+// includes this file; the calendar is Pango markup, which style.css can't reach.
+{
+    "clock": {
+        "calendar": {
+            "format": {
+                "months": "<span color='#bdbdbd'><b>{}</b></span>",
+                "days": "<span color='#bdbdbd'>{}</span>",
+                "weekdays": "<span color='#636363'>{}</span>",
+                "weeks": "<span color='#636363'>{}</span>",
+                "today": "<span color='#39bae6'><b>{}</b></span>"
+            }
+        }
+    }
+}

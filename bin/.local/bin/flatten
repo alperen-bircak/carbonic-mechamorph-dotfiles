@@ -1,0 +1,24 @@
+#!/bin/sh
+# Usage: flatten  -- undo every split on the focused workspace: all tiled
+# windows become direct side-by-side children of the workspace again.
+# Sway has no command for this, so each window takes a round trip through a
+# temporary workspace and comes back as a plain sibling. Floating windows stay.
+tree=$(swaymsg -t get_tree)
+ws=$(echo "$tree" | jq -r '[.. | objects | select(.type == "workspace" and ([.. | objects | .focused?] | any))][0].name')
+[ -z "$ws" ] || [ "$ws" = null ] && exit 0
+
+ids=$(echo "$tree" | jq -r --arg ws "$ws" '
+    def leaves: if (.nodes | length) == 0 then . else .nodes[] | leaves end;
+    .. | objects | select(.type == "workspace" and .name == $ws)
+    | select([.nodes[] | (.nodes | length) > 0] | any)   # something to flatten
+    | .nodes[] | leaves | .id')
+[ -z "$ids" ] && exit 0
+focused=$(echo "$tree" | jq '.. | objects | select(.focused? == true and .shell?) | .id')
+
+tmp=__flatten
+cmds=''
+for id in $ids; do cmds="$cmds[con_id=$id] move container to workspace $tmp; "; done
+for id in $ids; do cmds="$cmds[con_id=$id] move container to workspace \"$ws\"; "; done
+cmds="${cmds}workspace \"$ws\"; layout splith"
+[ -n "$focused" ] && cmds="$cmds; [con_id=$focused] focus"
+swaymsg -q "$cmds"

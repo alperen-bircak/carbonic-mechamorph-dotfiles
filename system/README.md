@@ -8,6 +8,7 @@ Run `just system` to see whether the live files still match these copies.
 |---|---|
 | `boot/loader/entries/arch.conf` | `quiet loglevel=3 systemd.show_status=auto rd.udev.log_level=3` to hide boot messages; `splash` to start Plymouth; `mem_sleep_default=deep` so suspend uses S3, which drains far less than s2idle |
 | `boot/loader/loader.conf` | `timeout 0` to skip the boot menu (hold Space at boot to show it) |
+| `etc/fstab` | `fmask=0077,dmask=0077` on `/boot` so only root can read it, including the boot loader's random seed (systemd warns when it's world-readable). vfat ignores mask changes on remount: apply with `umount /boot && mount /boot` |
 | `etc/mkinitcpio.conf` | `plymouth` in `HOOKS` so the splash starts early in boot |
 | `etc/plymouth/plymouthd.conf` | `Theme=wallpaper` |
 | `usr/share/plymouth/themes/wallpaper/` | Custom Plymouth theme: the wallpaper at boot and shutdown, covering all console text. Its `ImageDir` is `/usr/local/share/backgrounds`, so the `plymouth` hook packs `hex.png` into the initramfs |

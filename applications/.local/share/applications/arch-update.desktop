@@ -1,0 +1,10 @@
+[Desktop Entry]
+# Shadows /usr/share/applications/arch-update.desktop, which the tray icon's "Run Arch-Update"
+# opens. That one has Terminal=true, which GLib can't open (its terminal list lacks kitty).
+Name=Arch-Update
+Comment=An interactive update notifier & applier for Arch Linux
+Icon=arch-update-blue
+Type=Application
+Exec=kitty arch-update
+Terminal=false
+Categories=Utility;

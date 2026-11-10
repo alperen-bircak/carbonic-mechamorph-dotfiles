@@ -30,3 +30,7 @@ rofi-config:
 shell:
   filename: themes/shell/{{ scheme-system }}-{{ scheme-slug }}.sh
   supported-systems: [base24]
+
+waybar-calendar:
+  filename: themes/waybar-calendar/{{ scheme-system }}-{{ scheme-slug }}.jsonc
+  supported-systems: [base24]

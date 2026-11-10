@@ -52,9 +52,13 @@ swaynag_command $swaynag
 #
 # Small space between windows
 gaps inner 6
+# A lone window fills the workspace
+smart_gaps on
 # No title bars, just a thin border that shows which window is focused
 default_border pixel 2
 default_floating_border pixel 2
+# A lone window needs no border, which also hides the cyan split indicator on it
+smart_borders on
 # Jump to a window that asks for focus instead of only marking its workspace
 # urgent. Only works when the app passes an activation token (kitty does for
 # links); use Mod+u for apps that don't.
@@ -70,6 +74,11 @@ for_window [app_id="^tui\."] floating enable
 for_window [app_id="blueman-manager"] floating enable, resize set 800 500, move position center
 # Float update-background's file picker (it has no parent window, so it would tile)
 for_window [app_id="xdg-desktop-portal-gtk" title="^Choose a background$"] floating enable
+# Float the yazi file dialogs (xdg-desktop-portal-termfilechooser runs them as kitty --class termfilechooser)
+for_window [app_id="^termfilechooser$"] floating enable, resize set 60 ppt 70 ppt, move position center
+# btop-workspace's window stays on its own workspace, fullscreen over the bar
+assign [app_id="^btop-workspace$"] workspace btop
+for_window [app_id="^btop-workspace$"] fullscreen enable
 
 ### Idle configuration
 #
@@ -88,12 +97,19 @@ exec swayosd-server
 exec /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 # Automount USB drives (with a notification)
 exec udiskie
-# Record clipboard history (browse it with `clip` in a terminal)
+# Record clipboard history (browse it with Alt+v, or `clip` in a terminal)
 exec wl-paste --watch cliphist store
 # Close the waybar TUIs (ephemeral-tui) when you click another window
 exec ~/.local/bin/tui-autoclose
 # Notify when the battery gets low (defaults: 15% and 5%)
 exec batsignal
+# Update reminders (Arch-Update): the tray icon shows when pacman, AUR or Flatpak updates are
+# waiting, and the timer checks 15s after login and then every 6h, with a notification
+exec systemctl --user start arch-update.timer
+exec sleep 3 && arch-update --tray
+# calcurse's reminder daemon: a notification before each appointment (calcurse/.config/calcurse/conf)
+# (the query first creates calcurse's data files on a new machine; the daemon exits without them)
+exec sh -c 'calcurse -Q >/dev/null; calcurse --daemon'
 # Stop logind shutting down on the power key, so the binding below gets it. Ends with sway (swaymsg
 # exits when sway does), so the key still shuts down from the login screen.
 exec systemd-inhibit --what=handle-power-key --who=sway --why='sway binds the power key' swaymsg -t subscribe -m '["shutdown"]'
@@ -127,6 +143,11 @@ exec systemd-inhibit --what=handle-power-key --who=sway --why='sway binds the po
 
     # Kill focused window
     bindsym $mod+Shift+q kill
+    # Force-kill the focused window's process (SIGKILL)
+    bindsym $mod+Shift+Ctrl+q exec kill -9 $(swaymsg -t get_tree | jq '.. | select(.focused? == true) | .pid')
+    # Close every other window on this workspace / on all workspaces
+    bindsym $mod+BackSpace exec ~/.local/bin/close-others workspace
+    bindsym $mod+Shift+BackSpace exec ~/.local/bin/close-others all
 
     # Start your launcher
     bindsym $mod+d exec $menu
@@ -203,13 +224,12 @@ exec systemd-inhibit --what=handle-power-key --who=sway --why='sway binds the po
 #
 # Layout stuff:
 #
-    # You can "split" the current object of your focus with
-    # $mod+b or $mod+v, for horizontal and vertical splits
-    # respectively.
-    bindsym $mod+b splith
+    # Split the focused window vertically ($mod+e toggles the direction)
     bindsym $mod+v splitv
     # Undo a split while the window is still the only one in it
     bindsym $mod+c exec ~/.local/bin/unsplit
+    # Flatten every split on this workspace back into one side-by-side row
+    bindsym $mod+Escape exec ~/.local/bin/flatten
 
     # Switch the current container between different layout styles
     bindsym $mod+s layout stacking
@@ -245,6 +265,10 @@ exec systemd-inhibit --what=handle-power-key --who=sway --why='sway binds the po
 #
 # Resizing containers:
 #
+    # Halve or double the focused window
+    bindsym $mod+b exec ~/.local/bin/scale-window half
+    bindsym $mod+Shift+b exec ~/.local/bin/scale-window double
+
 mode "resize" {
     # left will shrink the containers width
     # right will grow the containers width
@@ -289,10 +313,15 @@ bindsym $mod+r mode "resize"
     # Power key: opens the Power menu, a second press while it's open suspends. Not --locked, so
     # the press that wakes the laptop doesn't open the menu behind the lock screen.
     bindsym --no-repeat XF86PowerOff exec ~/.local/bin/super-menu power-key
+    # Open btop fullscreen on its own workspace, or jump to it if it's already open
+    bindsym --no-repeat Ctrl+Mod1+Delete exec ~/.local/bin/btop-workspace
 
-    # Screenshots: saved to ~/Pictures/Screenshots and copied to the clipboard
+    # Screenshots: saved to ~/Pictures/Screenshots and copied to the clipboard, with a notification
     bindsym Print exec ~/.local/bin/screenshot
     bindsym Shift+Print exec ~/.local/bin/screenshot area
+
+    # Clipboard history in rofi, with image thumbnails (Escape or a second press closes it)
+    bindsym --no-repeat Mod1+v exec ~/.local/bin/clip-menu
 
 #
 # Status Bar:

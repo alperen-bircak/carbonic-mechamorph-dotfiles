@@ -1,0 +1,4 @@
+[D-BUS Service]
+# "Show in folder" opens yazi instead of Thunar (see ~/.local/bin/yazi-filemanager1)
+Name=org.freedesktop.FileManager1
+Exec=/bin/sh -c 'exec "$HOME/.local/bin/yazi-filemanager1"'

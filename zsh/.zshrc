@@ -2,8 +2,20 @@
 # ~/.zshrc
 #
 
-alias ls='ls --color=auto'
+# eza in place of ls: Nerd Font icons, folders first, git status in the long views.
+# Its colours are the terminal's, so they follow the theme.
+alias ls='eza --icons=auto --group-directories-first'
+alias l='ls -a'
+alias ll='eza -l --icons=auto --group-directories-first --git'
+alias la='eza -la --icons=auto --group-directories-first --git'
+alias lt='eza --tree -L 2 --icons=auto --group-directories-first'
 alias grep='grep --color=auto'
+
+# bat (a cat with syntax highlighting) uses the terminal's colours, which come from the active
+# theme, like btop's TTY theme. It also colours man pages.
+export BAT_THEME=ansi
+export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+export MANROFFOPT="-c"
 alias fetch='fastfetch'
 eval "$(starship init zsh)"
 # Starship's timer can't depend on the result, so drop the duration of commands that worked
@@ -45,10 +57,23 @@ export FZF_DEFAULT_OPTS="--color=$FZF_COLORS"
 # Show hidden files and folders by default (`.` toggles them in nnn)
 export NNN_OPTS="H"
 
+# yazi file manager: `y` opens it; quit with q to cd the shell to where you were, Q to stay put
+function y() {
+	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+	yazi "$@" --cwd-file="$tmp"
+	IFS= read -r -d '' cwd < "$tmp"
+	[ -n "$cwd" ] && [ "$cwd" != "$PWD" ] && builtin cd -- "$cwd"
+	rm -f -- "$tmp"
+}
+
 # nvm (Node version manager, installed in ~/.nvm); default is the Node LTS
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
 [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
+
+# zoxide: `z NAME` jumps to the folder you use most that matches NAME, `zi` picks one with fzf.
+# After compinit, which its completions need.
+eval "$(zoxide init zsh)"
 
 # Grey suggestions from history (right arrow accepts), and colours while typing.
 # zsh-syntax-highlighting has to be sourced last.

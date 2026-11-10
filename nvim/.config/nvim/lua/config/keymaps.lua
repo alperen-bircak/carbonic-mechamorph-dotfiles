@@ -10,6 +10,9 @@ map('n', '<leader>q', '<cmd>quit<cr>', { desc = 'Quit window' })
 map('n', '<leader>dd', vim.diagnostic.open_float, { desc = 'Show diagnostic' })
 map('n', '<leader>dl', vim.diagnostic.setloclist, { desc = 'List buffer diagnostics' })
 map('n', '<leader>dq', vim.diagnostic.setqflist, { desc = 'List all diagnostics' })
+map('n', '<leader>dt', function()
+  vim.diagnostic.config({ virtual_text = not vim.diagnostic.config().virtual_text })
+end, { desc = 'Toggle inline diagnostics' })
 
 -- Window navigation: <C-h> instead of <C-w>h, etc.
 map('n', '<C-h>', '<C-w>h', { desc = 'Window left' })

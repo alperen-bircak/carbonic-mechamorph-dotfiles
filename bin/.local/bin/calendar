@@ -1,0 +1,10 @@
+#!/bin/sh
+# Usage: calendar  (a click on waybar's clock)
+# calcurse in an ephemeral-tui window: a second click or a click elsewhere closes it. Closing
+# presses Escape (cancels a prompt) and q (quits and saves), so nothing typed into calcurse is lost
+# except a half-finished prompt.
+# LC_TIME: English day and month names (the system's is Turkish); the date formats are in its conf.
+# ESCDELAY: ncurses waits this long (ms, default 1000) after Escape for more keys; without it, the
+# q right after Escape would read as Alt+q.
+exec ~/.local/bin/ephemeral-tui -s 110x32 -q "escape q" calcurse \
+    env LC_TIME=en_US.UTF-8 ESCDELAY=25 calcurse

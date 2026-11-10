@@ -1,7 +1,7 @@
 #!/bin/sh
 # Usage: tui-autoclose  (started from the sway config)
 # Close ephemeral-tui's floating windows (app_id tui.*) when you click (or switch) to something
-# else. ephemeral-tui turns off focus_follows_mouse while one is open, so hovering doesn't count;
+# else, through ephemeral-tui --close (which presses an app's quit keys if it has any). ephemeral-tui turns off focus_follows_mouse while one is open, so hovering doesn't count;
 # it's turned back on (sway's default) here once no TUI has focus.
 swaymsg -t subscribe -m '["window", "workspace"]' |
     jq --unbuffered -r 'select(.change == "focus" or .change == "close") | .change' |
@@ -12,9 +12,10 @@ swaymsg -t subscribe -m '["window", "workspace"]' |
             | .. | objects
             | select((.app_id? // "") | startswith("tui."))
             | select(.app_id != $focused)
-            | .id' |
-            while read -r id; do
-                swaymsg -q "[con_id=$id] kill"
+            | .app_id' |
+            while read -r app_id; do
+                # in the background: an app with quit keys takes a moment to close
+                ~/.local/bin/ephemeral-tui --close "${app_id#tui.}" &
             done
         if ! echo "$tree" | jq -e '[.. | objects | select(.focused? == true)][0].app_id // "" | startswith("tui.")' >/dev/null; then
             swaymsg -q focus_follows_mouse yes

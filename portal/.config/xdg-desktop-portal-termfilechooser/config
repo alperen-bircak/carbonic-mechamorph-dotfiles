@@ -1,0 +1,11 @@
+# File dialogs (open/save) as yazi in kitty. See man xdg-desktop-portal-termfilechooser.
+# In yazi: Enter picks the file (Space marks several first); q cancels.
+# Saving starts on a placeholder file with the suggested name: Enter on it saves there,
+# or go to another folder and pick it there.
+[filechooser]
+cmd=yazi-wrapper.sh
+default_dir=$HOME
+# app_id termfilechooser, so sway floats it
+env=TERMCMD=kitty --class termfilechooser
+open_mode=suggested
+save_mode=suggested

@@ -1,0 +1,5 @@
+# yazi file manager. Only overrides go here; the rest are yazi's built-in defaults.
+
+[mgr]
+# Show hidden files and folders by default (`.` toggles them)
+show_hidden = true

@@ -1,0 +1,54 @@
+#!/bin/sh
+# Usage: clip-menu  (Alt+v in sway)
+# Clipboard history in rofi: type to search, Enter copies the entry back to the clipboard,
+# Escape or a second Alt+v closes it. Images show a thumbnail. `clip` is the fzf version, for
+# use inside a terminal.
+# Based on cliphist's contrib/cliphist-rofi-img
+# (https://github.com/sentriz/cliphist/blob/master/contrib/cliphist-rofi-img). That script
+# reads `cliphist list -fields`, which cliphist 0.7 doesn't have, so this finds images from
+# their preview instead ("[[ binary data 501 KiB png 3200x1800 ]]").
+
+pkill -x rofi && exit
+
+# Decoded images, named ID.EXT, so rofi can show them as icons. Kept between runs, and removed
+# once their entry leaves the history.
+thumbs=${XDG_RUNTIME_DIR:-/tmp}/clip-menu
+mkdir -p "$thumbs"
+# The rofi list goes through a file: the icon lines hold a NUL byte, which a shell variable drops
+list=$thumbs.list
+tab=$(printf '\t')
+
+# One "ID<tab>preview" line per entry, plus "\0icon\x1fFILE" on images. Browsers copy an
+# image together with an HTML <meta> entry, which is noise, so it's left out.
+cliphist list | while IFS=$tab read -r id preview; do
+    case $preview in
+        '<meta http-equiv='*) continue ;;
+        '[[ binary data '*)
+            ext=$(printf '%s\n' "$preview" | grep -oiE ' (png|jpe?g|gif|bmp|webp) ' | tr -d ' ')
+            if [ -n "$ext" ]; then
+                file=$thumbs/$id.$ext
+                [ -s "$file" ] || cliphist decode "$id" > "$file"
+                printf '%s\t%s\0icon\037%s\n' "$id" "$preview" "$file"
+                continue
+            fi ;;
+    esac
+    printf '%s\t%s\n' "$id" "$preview"
+done > "$list"
+
+# Remove thumbnails whose entry is gone (deleted, or pushed out of the history)
+for file in "$thumbs"/*; do
+    [ -e "$file" ] || continue
+    id=${file##*/}
+    grep -aq "^${id%%.*}$tab" "$list" || rm -f "$file"
+done
+
+# The ID column stays hidden: rofi shows and searches the preview only. -format i prints
+# the picked line's index.
+i=$(rofi -dmenu -i -no-custom -show-icons -format i -p Clipboard \
+    -display-columns 2 -display-column-separator '\t' < "$list") || exit 0
+id=$(sed -n "$((i + 1))p" "$list" | cut -f1)
+[ -n "$id" ] || exit 0
+
+# wl-copy stays in the background to serve the clipboard, so it gets no stdout or stderr to
+# hold on to.
+cliphist decode "$id" | wl-copy >/dev/null 2>&1

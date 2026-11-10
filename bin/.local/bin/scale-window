@@ -1,0 +1,11 @@
+#!/bin/sh
+# Usage: scale-window half|double  -- resize the focused window's width and height
+case $1 in
+    half) op='/ 2' ;;
+    double) op='* 2' ;;
+    *) echo "usage: scale-window half|double" >&2; exit 2 ;;
+esac
+
+size=$(swaymsg -t get_tree | jq -r ".. | objects | select(.focused == true) | \"\(.rect.width $op | floor) \(.rect.height $op | floor)\"")
+set -- $size
+swaymsg -q "resize set width $1 px height $2 px"

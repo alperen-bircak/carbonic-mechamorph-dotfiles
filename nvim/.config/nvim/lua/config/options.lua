@@ -18,6 +18,7 @@ o.shiftwidth = 4 -- width of one indent level
 o.tabstop = 4 -- width of a tab character
 o.clipboard = 'unnamedplus' -- yank/paste use the system clipboard (via wl-clipboard)
 o.undofile = true -- keep undo history after closing a file
+o.confirm = true -- quitting with unsaved changes asks Save/No/Cancel instead of erroring
 
 -- Search
 o.ignorecase = true -- case-insensitive search...

@@ -1,0 +1,15 @@
+// {{scheme-name}}: colours for the calendar in waybar's clock tooltip. waybar's config
+// includes this file; the calendar is Pango markup, which style.css can't reach.
+{
+    "clock": {
+        "calendar": {
+            "format": {
+                "months": "<span color='#{{base05-hex}}'><b>{}</b></span>",
+                "days": "<span color='#{{base05-hex}}'>{}</span>",
+                "weekdays": "<span color='#{{base03-hex}}'>{}</span>",
+                "weeks": "<span color='#{{base03-hex}}'>{}</span>",
+                "today": "<span color='#{{base0D-hex}}'><b>{}</b></span>"
+            }
+        }
+    }
+}

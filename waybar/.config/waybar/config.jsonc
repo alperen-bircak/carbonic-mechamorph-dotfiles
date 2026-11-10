@@ -1,6 +1,8 @@
 // -*- mode: jsonc -*-
 // Waybar config. Widths are set in style.css (see the comment there).
 {
+    // The clock calendar's colours, from the active theme (merged into "clock" below)
+    "include": ["~/.config/theme/waybar-calendar.jsonc"],
     "height": 30,
     "spacing": 4, // gap between modules
     "modules-left": [
@@ -115,7 +117,7 @@
         "align": 0.5
     },
     "battery": {
-        "on-click": "~/.local/bin/ephemeral-tui battop", // floating TUI, closes on a second click or unfocus
+        "on-click": "~/.local/bin/super-menu profile", // TLP power profile menu, closes on a second click
         "align": 1,
         "states": {
             "warning": 30,
@@ -130,8 +132,27 @@
     "clock": {
         "align": 0.5,
         "format": "{:%d.%m.%Y %H:%M}",
-        "locale": "tr_TR.UTF-8",
-        "tooltip-format": "<tt><small>{calendar}</small></tt>"
+        // English month and day names; the date format above and the Monday-first weeks below are set
+        // explicitly, so they stay as they are (the system keeps LC_TIME=tr_TR for other apps)
+        "locale": "en_US.UTF-8",
+        // Hover for the calendar: scroll for other months, right-click for the whole year
+        "tooltip-format": "<tt><small>{calendar}</small></tt>",
+        "calendar": {
+            "mode": "month",
+            "mode-mon-col": 3,
+            "weeks-pos": "left", // ISO week numbers, muted
+            "iso8601": true,
+            "on-scroll": 1
+            // "format" (the colours) comes from the theme's waybar-calendar.jsonc
+        },
+        "actions": {
+            "on-click-right": "mode",
+            "on-click-middle": "shift_reset",
+            "on-scroll-up": "shift_down",
+            "on-scroll-down": "shift_up"
+        },
+        // Click for calcurse, the calendar with appointments and todos
+        "on-click": "~/.local/bin/calendar"
     },
     "custom/power": {
         "on-click": "~/.local/bin/super-menu power", // rofi menu, closes on a second click

@@ -1,18 +1,61 @@
 #!/bin/sh
-# Usage: ephemeral-tui [-s COLSxROWS] NAME [COMMAND...]
+# Usage: ephemeral-tui [-s COLSxROWS] [-q KEYS] NAME [COMMAND...]
+#        ephemeral-tui --close NAME
 # Open COMMAND (default: NAME) in a floating kitty window, or close it if it's already open.
 # Waybar's module clicks use this. The window's app_id is tui.NAME: sway floats every tui.*
-# window (for_window rule) and tui-autoclose closes them when you click something else.
+# window (for_window rule) and tui-autoclose closes them (with --close) when you click something else.
 # -s sets the window size in cells (default 100x28).
-size=100x28
-if [ "$1" = -s ]; then size=$2; shift 2; fi
+# -q gives the app's own quit keys, as kitty key names (e.g. "escape q"). Closing presses them, so
+# the app quits the normal way (and saves), instead of killing the window. Apps without -q are killed.
+dir=${XDG_RUNTIME_DIR:-/tmp}/ephemeral-tui
+
+is_open() {
+    swaymsg -t get_tree | jq -e --arg id "tui.$1" '.. | objects | select(.app_id? == $id)' >/dev/null
+}
+
+# Close tui.NAME. With quit keys, press them up to 3 times (an app can be a menu or a prompt deep:
+# Escape backs out, q quits a level), and kill the window only if it's still open after that.
+# The lock keeps a second close (another focus event, or a click) from pressing keys in between.
+close() {
+    name=$1
+    mkdir "$dir/$name.closing" 2>/dev/null || return 0
+    if [ -f "$dir/$name.keys" ] && [ -S "$dir/$name.sock" ]; then
+        keys=$(cat "$dir/$name.keys")
+        for _ in 1 2 3; do
+            for key in $keys; do
+                kitten @ --to "unix:$dir/$name.sock" send-key "$key" >/dev/null 2>&1
+                sleep 0.1
+            done
+            sleep 0.4
+            is_open "$name" || break
+        done
+    fi
+    is_open "$name" && swaymsg -q "[app_id=\"^tui\\.$name\$\"] kill"
+    rm -f "$dir/$name.keys"
+    rmdir "$dir/$name.closing"
+}
+
+if [ "$1" = --close ]; then
+    close "$2"
+    exit 0
+fi
+
+size=100x28 keys=
+while :; do
+    case $1 in
+        -s) size=$2; shift 2 ;;
+        -q) keys=$2; shift 2 ;;
+        *) break ;;
+    esac
+done
 cols=${size%x*} rows=${size#*x}
 name=$1; shift
 [ $# -eq 0 ] && set -- "$name"
 app_id="tui.$name"
 
-if swaymsg -t get_tree | jq -e --arg id "$app_id" '.. | objects | select(.app_id? == $id)' >/dev/null; then
-    swaymsg -q "[app_id=\"^tui\\.$name\$\"] kill"
+mkdir -p "$dir"
+if is_open "$name"; then
+    close "$name"
     exit 0
 fi
 
@@ -22,6 +65,15 @@ if ! command -v "$1" >/dev/null; then
 fi
 # only a click elsewhere should close it, not hovering (tui-autoclose turns this back on)
 swaymsg -q focus_follows_mouse no
+
+# With quit keys, kitty listens on a socket, for this window only, so close can press them.
+# (A close lock left from an interrupted close would stop this window from ever closing.)
+rm -f "$dir/$name.keys"
+rmdir "$dir/$name.closing" 2>/dev/null
+if [ -n "$keys" ]; then
+    printf '%s\n' "$keys" > "$dir/$name.keys"
+    set -- -o allow_remote_control=socket-only --listen-on "unix:$dir/$name.sock" "$@"
+fi
 
 # Size in cells instead of the remembered size of the last kitty window, and no
 # "process still running" prompt when the window is closed.

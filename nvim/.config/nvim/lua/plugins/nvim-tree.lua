@@ -59,3 +59,21 @@ vim.api.nvim_create_autocmd('QuitPre', {
     end)
   end,
 })
+
+-- Plain `nvim` opens the tree on the folder it was run in. `nvim file`, `nvim -`
+-- and headless runs are left alone; `nvim folder` is handled by nvim-tree itself.
+local started_with_stdin = false
+vim.api.nvim_create_autocmd('StdinReadPre', {
+  group = 'plugins.nvim-tree',
+  callback = function()
+    started_with_stdin = true
+  end,
+})
+vim.api.nvim_create_autocmd('VimEnter', {
+  group = 'plugins.nvim-tree',
+  callback = function()
+    if vim.fn.argc(-1) == 0 and not started_with_stdin and #vim.api.nvim_list_uis() > 0 then
+      require('nvim-tree.api').tree.open({ path = vim.fn.getcwd() })
+    end
+  end,
+})
