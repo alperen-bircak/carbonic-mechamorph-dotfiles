@@ -1,5 +1,6 @@
 import { buildGrid, type Grid } from "./hexgrid";
 import type { ExportFormat, Settings } from "./settings";
+import { logoSvg } from "./swayLogo";
 
 const f = (n: number) => +n.toFixed(2);
 
@@ -57,6 +58,12 @@ export function buildSvg(s: Settings, grid: Grid = buildGrid(s)): string {
       for (const c of grid.cells) out.push(use(c.x, c.y, ` stroke="${c.stroke}"`));
     }
     out.push("</g>");
+  }
+
+  if (s.logo) {
+    out.push(logoSvg(W / 2, H / 2, (Math.min(W, H) * s.logoSize) / 100, {
+      side: s.logoSide, ground: s.logoGround, trunk: s.logoTrunk, leaves: s.logoLeaves,
+    }));
   }
 
   out.push("</svg>");

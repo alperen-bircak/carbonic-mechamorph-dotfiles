@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# retro-addr: finds the Compaq netbook (retro-mechamorph) when its mDNS name, retro-mechamorph.local,
+# doesn't resolve (a network that blocks multicast, or avahi down). Used by ~/.ssh/config (the `ssh`
+# package): a Match block runs it only then, and includes what it writes.
+# Sweeps every local IPv4 /24 with ssh-keyscan and keeps the address whose ed25519 host key is the
+# one known_hosts has under the alias retro-mechamorph, so a wrong machine never matches. Writes
+# "HostName <ip>" to ~/.cache/retro-addr.conf (the last address found is tried first) and fails
+# when the netbook isn't there.
+set -uo pipefail
+out=~/.cache/retro-addr.conf
+known=$(ssh-keygen -F retro-mechamorph 2>/dev/null | awk '!/^#/ && $2 == "ssh-ed25519" {print $3}')
+[[ -n $known ]] || exit 1
+
+# The host whose ed25519 key matches, from a list of addresses on stdin
+scan() { ssh-keyscan -T 2 -t ed25519 -f - 2>/dev/null | awk -v k="$known" '$3 == k {print $1; exit}'; }
+
+ip=
+[[ -f $out ]] && ip=$(awk '{print $2}' "$out" | scan)
+if [[ -z $ip ]]; then
+    ip=$(ip -4 -o addr show scope global |
+        awk '{split($4, a, "/"); sub(/\.[0-9]+$/, "", a[1]); print a[1]}' | sort -u |
+        while read -r net; do printf '%s\n' "$net".{1..254}; done | scan)
+fi
+[[ -n $ip ]] || exit 1
+mkdir -p "${out%/*}"
+printf 'HostName %s\n' "$ip" >"$out"

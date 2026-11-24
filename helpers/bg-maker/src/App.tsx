@@ -11,6 +11,7 @@ import { buildGrid, effectiveAngle } from "./lib/hexgrid";
 import { useHistory } from "./lib/history";
 import { applyLook } from "./lib/looks";
 import { buildSvg, download, exportImage, formatBytes, svgBlob } from "./lib/render";
+import { LOGO_PARTS, LOGO_PRESETS, type LogoColors, type LogoPart } from "./lib/swayLogo";
 import {
   DEFAULTS, PALETTES, RESOLUTIONS, loadSettings, sanitize, saveSettings, shareLink,
   type Distribution, type ExportFormat, type Settings,
@@ -332,6 +333,32 @@ export default function App() {
               </div>
             )}
           </Section>
+
+          <Section title="Sway logo" icon={<I.IconTree />}>
+            <Toggle label="Show logo" checked={s.logo} onChange={(v) => update("logo", v)} hint="The sway tree in the middle of the canvas" />
+            {s.logo && (
+              <>
+                <Slider label="Size" value={s.logoSize} onChange={(v) => update("logoSize", v)} min={2} max={100} step={0.5} unit="%" reset={DEFAULTS.logoSize}
+                  hint="Logo height as a share of the canvas's shorter side" />
+                <p className="note tight">{Math.round((Math.min(s.width, s.height) * s.logoSize) / 100)} px tall</p>
+                {LOGO_PARTS.map(({ part, label }) => (
+                  <Row key={part} label={label}>
+                    <ColorInput value={s[LOGO_KEY[part]]} onChange={(v) => update(LOGO_KEY[part], v)} label={`Logo ${label.toLowerCase()}`} size="sm" />
+                  </Row>
+                ))}
+                <div className="chips">
+                  {LOGO_PRESETS.map((p) => (
+                    <button key={p.name} className="chip" onClick={() => setS((prev) => withLogoColors(prev, p.colors))}>{p.name}</button>
+                  ))}
+                  <button className="chip" title="Take the last four palette colours" onClick={() => setS((prev) => {
+                    const c = prev.palette.slice(-4);
+                    while (c.length < 4) c.unshift(c[0]);
+                    return withLogoColors(prev, { side: c[0], ground: c[1], trunk: c[3], leaves: c[2] });
+                  })}>From palette</button>
+                </div>
+              </>
+            )}
+          </Section>
         </div>
 
         <div className="export">
@@ -372,7 +399,15 @@ export default function App() {
   );
 }
 
-const fmtStretch = (f: number) => {
+const LOGO_KEY = {
+  side: "logoSide", ground: "logoGround", trunk: "logoTrunk", leaves: "logoLeaves",
+} as const satisfies Record<LogoPart, keyof Settings>;
+
+const withLogoColors = (s: Settings, c: LogoColors): Settings => ({
+  ...s, logoSide: c.side, logoGround: c.ground, logoTrunk: c.trunk, logoLeaves: c.leaves,
+});
+
+const fmtStretch =(f: number) => {
   const p = (f - 1) * 100;
   if (Math.abs(p) < 0.05) return "perfectly regular";
   return `${Math.abs(p).toFixed(1)} % ${p > 0 ? "wider" : "narrower"} than regular`;

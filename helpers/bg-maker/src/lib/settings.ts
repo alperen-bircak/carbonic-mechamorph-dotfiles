@@ -44,6 +44,14 @@ export type Settings = {
   shading: number; // bevel strength %
   lightAngle: number;
 
+  // Sway logo in the middle
+  logo: boolean;
+  logoSize: number; // height, % of the canvas's shorter side
+  logoSide: string;
+  logoGround: string;
+  logoTrunk: string;
+  logoLeaves: string;
+
   // Export
   format: ExportFormat;
   quality: number; // jpeg/webp, %
@@ -85,6 +93,13 @@ export const DEFAULTS: Settings = {
   strokeOpacity: 100,
   shading: 0,
   lightAngle: 315,
+
+  logo: false,
+  logoSize: 30,
+  logoSide: "#ff4040",
+  logoGround: "#afa137",
+  logoTrunk: "#c6adac",
+  logoLeaves: "#68751c",
 
   format: "png",
   quality: 92,

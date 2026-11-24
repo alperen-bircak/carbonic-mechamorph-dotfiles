@@ -132,5 +132,11 @@ export function applyLook(current: Settings, look: Look): Settings {
     tileable: current.tileable,
     format: current.format,
     quality: current.quality,
+    logo: current.logo,
+    logoSize: current.logoSize,
+    logoSide: current.logoSide,
+    logoGround: current.logoGround,
+    logoTrunk: current.logoTrunk,
+    logoLeaves: current.logoLeaves,
   };
 }

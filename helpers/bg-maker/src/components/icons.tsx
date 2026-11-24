@@ -24,4 +24,5 @@ export const IconCopy = () => <Icon d="M8 8h11v11H8zM5 15V5h10" />;
 export const IconFit = () => <Icon d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />;
 export const IconActual = () => <Icon d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-4-4M8 11h6M11 8v6" />;
 export const IconLink = () => <Icon d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" />;
+export const IconTree = () => <Icon d="M12 21v-9M12 12c-3 0-6-1.5-6-4.5S9 3 12 3s6 1.5 6 4.5-3 4.5-6 4.5zM5 21h14" />;
 export const IconTiles = () => <Icon d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z" />;

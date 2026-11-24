@@ -40,6 +40,8 @@ Each colour picker has a 2D picker, a hex field, H/S/L sliders, recently used co
 
 **Border & shading**: border width, a colour that is either custom or taken from each hex's fill (lighter or darker), border opacity, and a bevel with an adjustable light direction.
 
+**Sway logo**: the sway tree (from the sway repo's `assets/Sway_Tree.svg`, CC0) centred on the canvas, drawn over the hexes. Its size is the logo's height as a share of the canvas's shorter side; the app shows the result in px. Each of its four colours (side, ground, trunk, leaves) has its own picker, with presets: *Original*, *Wallpaper* (white trunk, as on sway's default wallpaper), *White*, *Black* and *From palette* (the last four palette colours). Applying a Look keeps the logo settings.
+
 **Export**: PNG, JPEG or WebP (quality slider) at full resolution, or SVG. SVGs stay small because each hex is a `<use>` of one shared path. You can also copy the SVG markup.
 
 **Other**: undo and redo, *Surprise me* for random settings, settings saved as preset `.json` files or a share link, and settings kept between visits.
@@ -60,4 +62,5 @@ Each colour picker has a 2D picker, a hex field, H/S/L sliders, recently used co
 - `src/lib/color.ts`: hex/HSL/OKLab conversions and palette sampling
 - `src/lib/settings.ts`: settings type, defaults, palette presets, storage, share links
 - `src/lib/looks.ts`: the complete Looks presets
+- `src/lib/swayLogo.ts`: the sway tree logo paths, colour presets and placement
 - `src/components/`: controls, colour picker, palette editor, angle dial, preview

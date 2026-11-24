@@ -12,6 +12,7 @@ Run `just system` to see whether the live files still match these copies.
 | `etc/mkinitcpio.conf` | `plymouth` in `HOOKS` so the splash starts early in boot |
 | `etc/plymouth/plymouthd.conf` | `Theme=wallpaper` |
 | `usr/share/plymouth/themes/wallpaper/` | Custom Plymouth theme: the wallpaper at boot and shutdown, covering all console text. Its `ImageDir` is `/usr/local/share/backgrounds`, so the `plymouth` hook packs `hex.png` into the initramfs |
+| `etc/nsswitch.conf` | `mdns4_minimal [NOTFOUND=return]` before `resolve` in `hosts:` (needs `nss-mdns` and `avahi-daemon`), so `.local` names resolve over mDNS, e.g. the netbook as `retro-mechamorph.local`. IPv4 only: an IPv6 answer could be a link-local address, which ssh can't use without a scope |
 | `etc/makepkg.conf` | `!debug` in `OPTIONS` so AUR builds don't make `-debug` packages |
 | `etc/greetd/config.toml` | Login screen: greetd runs nwg-hello inside sway, using `etc/greetd/sway-config` (enabled with `systemctl enable greetd`) |
 | `etc/greetd/sway-config` | New file: sway config for the login screen, with the desktop's `tr` keyboard layout and `eDP-1` scale 1.8 |
@@ -29,5 +30,6 @@ Run `just system` to see whether the live files still match these copies.
 Enabled services that don't come with a file here:
 
 - `swayosd-libinput-backend` (`systemctl enable --now swayosd-libinput-backend`): lets swayosd show Num Lock popups (Caps Lock is ignored, see `backend.toml` above). It runs as root because it reads the keyboard through libinput
+- `avahi-daemon` (`systemctl enable --now avahi-daemon`, from the `avahi` package): answers the mDNS lookups in `nsswitch.conf` above
 
 To restore one, copy it back as root, for example `run0 cp system/etc/makepkg.conf /etc/makepkg.conf`.

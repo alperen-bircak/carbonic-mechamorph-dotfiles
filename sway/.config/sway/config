@@ -36,13 +36,15 @@ output eDP-1 scale 1.8
 # $base00 and so on are in ~/.config/theme/sway.conf, the active theme
 include ~/.config/theme/sway.conf
 font pango:Fira Code 10
-# Grays only: subtle unfocused, stronger focused, indigo for where the next window opens
+# Only the focused window gets a subtle gray border, cyan on the side where the
+# next window opens; the rest have invisible (fully transparent) borders
+set $none #00000000
 # class                 border  bg      text    indicator child_border
-client.focused          $base03 $base01 $base05 $base0D   $base03
-client.focused_inactive $base02 $base00 $base03 $base02   $base02
-client.unfocused        $base02 $base00 $base03 $base02   $base02
+client.focused          $base02 $base01 $base05 $base0D   $base02
+client.focused_inactive $none   $base00 $base03 $none     $none
+client.unfocused        $none   $base00 $base03 $none     $none
 client.urgent           $base02 $base00 $base0F $base02   $base02
-client.placeholder      $base02 $base00 $base03 $base02   $base02
+client.placeholder      $none   $base00 $base03 $none     $none
 client.background       $base00
 # swaynag has no include, so its whole config is a theme file
 set $swaynag swaynag -c ~/.config/theme/swaynag.conf
